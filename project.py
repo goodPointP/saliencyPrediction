@@ -1,11 +1,14 @@
 import h5py
 import pandas as pd
 import custom
+import numpy as np
+import time
+
+
 #%% #Collection of datasets
 
 collection = h5py.File('../../Datasets/nature_dataset/etdb_v1.0.hdf5')
-meta = pd.read_csv('../../Datasets/nature_dataset/meta.csv', sep='; ', engine='python')
-# meta
+
 #%%  access a given dataset 
 # run collection.keys() to see datasets
 # select a dataset with collection['key']
@@ -18,15 +21,37 @@ for key in baseline.keys():
     
 
 #%%
-subject_index = 8
+subject_index = 40
 trial_number = 3
 name_of_experiment = 'Baseline'
 
-f = custom.compute_heatmap(df = df_baseline, s_index = subject_index, trial = trial_number, experiment = name_of_experiment)
+f, hm = custom.compute_heatmap(df = df_baseline, s_index = subject_index, s_trial = trial_number, experiment = name_of_experiment)
+#%% feature engineering
 
+df_engineered = custom.f_engi(df_baseline)
+#%% feature extraction
+
+relevant_columns = ['pupil','x','y', 'time']
+df_extracted = custom.f_extraction(df_engineered, relevant_columns)
+
+#%%
+ 
+su, tr = custom.get_subject_trial(df_baseline)
+
+#%% 500 images = 30sec
+t0 = time.time()
+tester = custom.compute_heatmap(df = df_baseline, s_index = su[:2], s_trial=tr, draw=False, experiment = 'Baseline')
+t1 = time.time()
+print(t1-t0)
 
 #%% Mock examples
 """
+notes: normalize pixel values for efficiency?
+different shape&size input?
+different shape&size output?
+very carefully consider the gaussian function (and its params) in use. Right now just copy pasta, but has a lot of impact.
+What kind of accuracy/loss criterion?
+
 uncomment lines below to test compute_heatmap() in a ... not functional way
 """
 # dims = (1280, 960)
