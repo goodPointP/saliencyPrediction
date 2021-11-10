@@ -1,7 +1,7 @@
 # Saliency Prediction
 A project for Cognitive Science 3, 2021
 
-Image segmentation model
+Instance segmentation (for images)
 
 https://www.analyticsvidhya.com/blog/2019/04/introduction-image-segmentation-techniques-python/
 
