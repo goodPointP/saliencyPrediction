@@ -4,6 +4,7 @@ A project for Cognitive Science 3, 2021
 Instance segmentation (for images)
 
 https://www.analyticsvidhya.com/blog/2019/04/introduction-image-segmentation-techniques-python/
+https://github.com/facebookresearch/detectron2
 
 Questions
     - Which pretrained to use?
