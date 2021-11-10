@@ -3,6 +3,8 @@ A project for Cognitive Science 3, 2021
 
 Image segmentation model
 
+https://www.analyticsvidhya.com/blog/2019/04/introduction-image-segmentation-techniques-python/
+
 Questions
     - Which pretrained to use?
 
