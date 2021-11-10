@@ -1,7 +1,31 @@
 # Saliency Prediction
 A project for Cognitive Science 3, 2021
 
-normalize pixel values for efficiency?
+Image segmentation model
+
+Questions
+    - Which pretrained to use?
+
+
+Gaze Data model
+
+BEFORE RUNNING CNN:
+    - FIGURE PRETRAINED
+    - FIGURE LOSS CRITERION
+    - FIGURE CNN STRUCTURE
+    - FIGURE I/O SHAPE&SIZE
+        - USE DEEPFIX AS STARTING POINT
+        
+Questions
+
+is this generative or predictive?????
+    - predict heatmap
+    - generate heatmap
+
+which pretrained to use henceforth?
+    -
+
+normalize pixel values thusly increasing efficiency?
     - test this
 
 different shape&size input?
@@ -15,3 +39,14 @@ very carefully consider the gaussian function (and its params) in use. Right now
     
 What kind of accuracy/loss criterion?
     - 
+
+
+Combined model
+
+How to combine
+
+Do we feed it heatmap or fixation points?
+
+Threshold for rendering?
+    - 1 Pixel of object contained in edge of heatmap sufficient?
+
