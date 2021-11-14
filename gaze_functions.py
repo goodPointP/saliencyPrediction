@@ -12,9 +12,20 @@ def get_subject_trial(df):
     for subject in subjects:
         trials.append(df[df.SUBJECTINDEX==subject].trial.unique())
     return subjects, trials
+
     
 
-def compute_heatmap(df, s_index, s_trial, experiment, draw=True): 
+def image_paths(df, subjects, trials, last_tr=None):
+    paths = []
+    for sub_idx, subject in enumerate(subjects):
+        for trial in trials[sub_idx][:last_tr]:
+            series = df[(df.SUBJECTINDEX == subject) & (df.trial == trial)].iloc[0]
+            cat, filenr = int(series.category), int(series.filenumber)
+            _, ext = os.path.splitext(os.listdir('../../Datasets/nature_dataset/{}/'.format(cat))[-1])
+            paths.append('../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext))
+    return paths
+
+def compute_heatmap(df, s_index, s_trial, experiment = None, last_tr=None, draw=True): 
     
     """
     df : DataFrame of gaze data
@@ -45,7 +56,8 @@ def compute_heatmap(df, s_index, s_trial, experiment, draw=True):
         draw=False
         heatmaps = []
         for s in s_index:
-            for t in s_trial[int(s)]:
+            print(s, last_tr)
+            for t in s_trial[int(s)-1][:last_tr]:
                 df_t = df.loc[(df.SUBJECTINDEX == s) & (df.trial == t)]
                 fixations = np.array((df_t.start, df_t.end, np.abs(df_t.start-df_t.end), df_t.x, df_t.y)).T
                 heatmaps.append(draw_heatmap(fixations, screendims, imagefile=None, draw=draw))
