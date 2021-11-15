@@ -45,10 +45,7 @@ class gazedataset(torch.utils.data.Dataset):
         self.root = root
         self.transform = transform
 
-        
-    def __dims__(self):
-        return()
-    
+
     def __len__(self):
         return(len(self.labels))
     
@@ -61,7 +58,19 @@ class gazedataset(torch.utils.data.Dataset):
             image = self.transform(image)
             label = self.transform(label).type(image.type())
         return image, label
-   
+
+#%%
+
+def remove_invalid_paths(paths, heatmaps):
+    for idx, path in enumerate(paths):
+        if not os.path.exists(path):
+            print("bingo", idx)
+            del heatmaps[idx]
+            del paths[idx]
+    return paths, heatmaps
+
+#%%
+
 #%% #Collection of datasets
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # device = torch.device('cpu')
@@ -86,8 +95,10 @@ for key in baseline.keys():
 #%%
 
 su, tr = gaze_functions.get_subject_trial(df_baseline)
-impaths = gaze_functions.image_paths(df_baseline, su, tr, 1)
+impaths = gaze_functions.image_paths(df_baseline, su, tr, 10)
 heatmaps = gaze_functions.compute_heatmap(df = df_baseline, s_index = su, s_trial = tr, experiment = 'Baseline', last_tr=10, draw=False)
+#%%
+impaths, heatmaps = remove_invalid_paths(impaths, heatmaps)
 
 #%% 
 transformer = transforms.Compose([transforms.ToTensor()])    
@@ -97,13 +108,11 @@ targets = targets_scaled
 
 
 gazedata_train = gazedataset(impaths[:400], targets[:400], transform=transformer)
-safe_gaze_train = nc.SafeDataset(gazedata_train) #Removes incomplete samples
-train_loader = torch.utils.data.DataLoader(safe_gaze_train.dataset, batch_size=2, shuffle=False, num_workers=2)
+train_loader = torch.utils.data.DataLoader(gazedata_train, batch_size=2, shuffle=False, num_workers=2)
 
 
 gazedata_test = gazedataset(impaths[400:], targets[400:], transform=transformer)
-safe_gaze_test = nc.SafeDataset(gazedata_test)
-test_loader = torch.utils.data.DataLoader(safe_gaze_test.dataset, batch_size=2, shuffle=False, num_workers=2)
+test_loader = torch.utils.data.DataLoader(gazedata_test, batch_size=2, shuffle=False, num_workers=2)
 
 
 #%%
@@ -161,6 +170,10 @@ if __name__ == '__main__':
         
 print("done")
 #%%
+
+print(valid_losses, train_losses)
+
+print(predict_test.cpu().detach().numpy()[0])
 
 # preview = predict_test.cpu().detach().numpy()[0]
 
