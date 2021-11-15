@@ -14,6 +14,7 @@ import torch.optim as optim
 class gazenet(torch.nn.Module):
     def __init__(self):
         super(gazenet, self).__init__()
+        
         self.relu = torch.nn.ReLU()
         self.pool = torch.nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         
@@ -32,7 +33,7 @@ class gazenet(torch.nn.Module):
         x = self.pool(self.relu(self.conv2(x)))
         x = self.relu(self.conv3(x))
         x = self.pool(self.relu(self.conv4(x))) 
-        x = self.relu(self.conv5(x))
+        # x = self.relu(self.conv5(x))
         x = self.pool(self.relu(self.conv6(x)))
         x = self.upsample(x)
         return x
@@ -86,7 +87,7 @@ for key in baseline.keys():
 
 su, tr = gaze_functions.get_subject_trial(df_baseline)
 impaths = gaze_functions.image_paths(df_baseline, su, tr, 1)
-heatmaps = gaze_functions.compute_heatmap(df = df_baseline, s_index = su, s_trial = tr, experiment = 'Baseline', last_tr=4, draw=False)
+heatmaps = gaze_functions.compute_heatmap(df = df_baseline, s_index = su, s_trial = tr, experiment = 'Baseline', last_tr=10, draw=False)
 
 #%% 
 transformer = transforms.Compose([transforms.ToTensor()])    
@@ -95,14 +96,14 @@ targets_scaled = (heatmaps-np.min(heatmaps))* (1/(np.max(heatmaps)-np.min(heatma
 targets = targets_scaled
 
 
-gazedata_train = gazedataset(impaths[:20], targets[:20], transform=transformer)
+gazedata_train = gazedataset(impaths[:400], targets[:400], transform=transformer)
 safe_gaze_train = nc.SafeDataset(gazedata_train) #Removes incomplete samples
-train_loader = torch.utils.data.DataLoader(safe_gaze_train.dataset, batch_size=4, shuffle=False, num_workers=2)
+train_loader = torch.utils.data.DataLoader(safe_gaze_train.dataset, batch_size=2, shuffle=False, num_workers=2)
 
 
-gazedata_test = gazedataset(impaths[20:25], targets[20:25], transform=transformer)
+gazedata_test = gazedataset(impaths[400:], targets[400:], transform=transformer)
 safe_gaze_test = nc.SafeDataset(gazedata_test)
-test_loader = torch.utils.data.DataLoader(safe_gaze_test.dataset, batch_size=4, shuffle=False, num_workers=1)
+test_loader = torch.utils.data.DataLoader(safe_gaze_test.dataset, batch_size=2, shuffle=False, num_workers=2)
 
 
 #%%
@@ -125,33 +126,34 @@ if __name__ == '__main__':
             print("training batch: ", idx)
             X = X.to(device)
             y = y.to(device)
-            print("here")
+            # print("here")
             optimizer.zero_grad()
-            print("there")
+            # print("there")
             predict = gnet(X)   
-            print("get")
+            # print("get")
             loss=loss_fn(predict,y)
-            print("jefe")
+            # print("jefe")
             loss.backward()
             
             optimizer.step()
             train_loss+=loss.item()*X.size(0)
-            if idx > 10:
-                print("stopping train after batch: ", idx)
-                break   
+            torch.cuda.empty_cache()
+            # if idx > 10:
+            #     print("stopping train after batch: ", idx)
+            #     break   
         with torch.no_grad():
             gnet.eval()
             for idx_t, (X_test, y_test) in enumerate(test_loader):
                 X_test = X_test.to(device)
                 y_test = y_test.to(device)
-                if idx_t < 2:
-                    print("testing batch: ", idx_t)
-                    predict_test = gnet(X_test)
-                    loss = loss_fn(predict_test, y_test)
-                    valid_loss+=loss.item()*X_test.size(0)
-                else:
-                    print("stopping eval")
-                    break
+                # if idx_t < 2:
+                print("testing batch: ", idx_t)
+                predict_test = gnet(X_test)
+                loss = loss_fn(predict_test, y_test)
+                valid_loss+=loss.item()*X_test.size(0)
+                # else:
+                #     print("stopping eval")
+                #     break
         train_loss=train_loss/len(train_loader.sampler) 
         valid_loss=valid_loss/len(test_loader.sampler)
         train_losses.append(train_loss)
