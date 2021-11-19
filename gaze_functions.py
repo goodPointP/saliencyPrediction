@@ -13,9 +13,26 @@ def get_subject_trial(df):
         trials.append(df[df.SUBJECTINDEX==subject].trial.unique())
     return subjects, trials
 
+
+
     
 
 def image_paths(df, subjects, trials, last_tr=None):
+    """
+    df : 
+        pd.DataFrame for experiment in question.
+    subjects : 
+        list of subjects
+        (n).
+    trials : 
+        list of trials for each subject to retrieve image paths from
+        (n, m).
+    last_tr : 
+        last trial to include for all subjects
+    paths : 
+        image paths from each of the subjects included trials
+
+    """
     paths = []
     for sub_idx, subject in enumerate(subjects):
         for trial in trials[sub_idx][:last_tr]:
@@ -24,6 +41,21 @@ def image_paths(df, subjects, trials, last_tr=None):
             _, ext = os.path.splitext(os.listdir('../../Datasets/nature_dataset/{}/'.format(cat))[-1])
             paths.append('../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext))
     return paths
+
+
+def remove_invalid_paths(paths, heatmaps):
+    """ 
+    input: paths (n, m), heatmaps (n, m)
+    if path == invalid removes both path and heatmap 
+    
+    output: paths (n-i, m) heatmaps (n-i, m))
+    """ 
+    for idx, path in enumerate(paths):
+        if not os.path.exists(path):
+            del heatmaps[idx]
+            del paths[idx]
+    return paths, heatmaps
+
 
 def compute_heatmap(df, s_index, s_trial, experiment = None, last_tr=None, draw=True): 
     
@@ -218,16 +250,19 @@ def draw_display(dispsize, imagefile=None):
     """
     
     # construct screen (black background)
-    _, ext = os.path.splitext(imagefile)
-    ext = ext.lower()
-    data_type = 'float32' if ext == '.png' else 'uint8'
+
+    data_type = 'float32'
     screen = np.zeros((dispsize[1],dispsize[0],3), dtype=data_type)
     # if an image location has been passed, draw the image
     if imagefile != None:
         # check if the path to the image exists
         if not os.path.isfile(imagefile):
             raise Exception("ERROR in draw_display: imagefile not found at '%s'" % imagefile)
-            
+        
+        _, ext = os.path.splitext(imagefile)
+        ext = ext.lower()
+        data_type = 'float32' if ext == '.png' else 'uint8'
+        
         # load image
         img = image.imread(imagefile)
         # flip image over the horizontal axis
@@ -295,7 +330,10 @@ def gaussian(x, sx, y=None, sy=None):
 
 
 def f_extraction(df, cols):
+    """
     
+    """
+
     df_copy = df.copy(deep=True)
     df_copy = df_copy[df_copy.columns.intersection(cols)]
     
