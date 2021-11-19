@@ -1,76 +1,12 @@
 import h5py
 import pandas as pd
 import gaze_functions
-import numpy as np
 import torch
 from torchvision import transforms
-from PIL import Image
-from torch.utils.data import Dataset, DataLoader
-import os
-import nonechucks as nc
 import torch.optim as optim
-
-#%%
-class gazenet(torch.nn.Module):
-    def __init__(self):
-        super(gazenet, self).__init__()
-        
-        self.relu = torch.nn.ReLU()
-        self.pool = torch.nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        
-        self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3,padding=1)
-        self.conv2 = torch.nn.Conv2d(64, 128, 3, padding=1)
-        self.conv3 = torch.nn.Conv2d(128, 128, 3, padding=1)
-        self.conv4 = torch.nn.Conv2d(128, 256, 3, padding=1)
-        self.conv5 = torch.nn.Conv2d(256, 256, 3, padding=1)
-        self.conv6 = torch.nn.Conv2d(256, 1, 1)
-        
-        self.upsample = torch.nn.Upsample(scale_factor=8, mode='bicubic', align_corners=False)
-    
-    def forward(self, x):
-
-        x = self.relu(self.conv1(x))
-        x = self.pool(self.relu(self.conv2(x)))
-        x = self.relu(self.conv3(x))
-        x = self.pool(self.relu(self.conv4(x))) 
-        # x = self.relu(self.conv5(x))
-        x = self.pool(self.relu(self.conv6(x)))
-        x = self.upsample(x)
-        return x
-    
-#%%
-class gazedataset(torch.utils.data.Dataset):
-    def __init__(self, root, labels, transform=None):
-        self.labels = labels
-        self.root = root
-        self.transform = transform
-
-
-    def __len__(self):
-        return(len(self.labels))
-    
-    def __getitem__(self, idx):
-        label = self.labels[idx]
-        imgpath = self.root[idx]
-        image = Image.open(imgpath)
-
-        if self.transform:
-            image = self.transform(image)
-            label = self.transform(label).type(image.type())
-        return image, label
-
-#%%
-
-def remove_invalid_paths(paths, heatmaps):
-    for idx, path in enumerate(paths):
-        if not os.path.exists(path):
-            print("bingo", idx)
-            del heatmaps[idx]
-            del paths[idx]
-    return paths, heatmaps
-
-#%%
-
+import CNN_functions
+from PIL import Image
+import matplotlib.pyplot as plt
 #%% #Collection of datasets
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # device = torch.device('cpu')
@@ -93,44 +29,85 @@ for key in baseline.keys():
 
 # f, hm = gaze_functions.compute_heatmap(df = df_baseline, s_index = subject_index, s_trial = trial_number, experiment = name_of_experiment)
 #%%
+tr_pr_su = 25
 
 su, tr = gaze_functions.get_subject_trial(df_baseline)
-impaths = gaze_functions.image_paths(df_baseline, su, tr, 10)
-heatmaps = gaze_functions.compute_heatmap(df = df_baseline, s_index = su, s_trial = tr, experiment = 'Baseline', last_tr=10, draw=False)
+
+
+
+impaths = gaze_functions.image_paths(df_baseline, su, tr, last_tr = tr_pr_su)
+heatmaps = gaze_functions.compute_heatmap(df = df_baseline, s_index = su, s_trial = tr, experiment = 'Baseline', last_tr= tr_pr_su, draw=False)
 #%%
-impaths, heatmaps = remove_invalid_paths(impaths, heatmaps)
+impaths, heatmaps = gaze_functions.remove_invalid_paths(impaths, heatmaps)
 
 #%% 
-transformer = transforms.Compose([transforms.ToTensor()])    
+transformer = transforms.Compose([transforms.Resize(256), 
+                            transforms.CenterCrop(224), 
+                            transforms.ToTensor() , 
+                            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                            ])
 
-targets_scaled = (heatmaps-np.min(heatmaps))* (1/(np.max(heatmaps)-np.min(heatmaps)))
-targets = targets_scaled
+target_transformer = transforms.Compose([transforms.ToTensor(), 
+                                         transforms.Resize(256),
+                                         transforms.CenterCrop(224)
+                                         ])
+
+# targets_scaled = (heatmaps-np.min(heatmaps))* (1/(np.max(heatmaps)-np.min(heatmaps)))
+targets = heatmaps
+
+samples = len(impaths)
+bs = 2
+workers = 2
+
+gazedata_train = CNN_functions.gazedataset(impaths[:int(samples/5*4)], 
+                                           targets[:int(samples/5*4)], 
+                                           transform=transformer,
+                                           target_transform = target_transformer
+                                           )
+
+train_loader = torch.utils.data.DataLoader(gazedata_train, 
+                                           batch_size=bs, 
+                                           shuffle=True, 
+                                           num_workers=workers
+                                           )
 
 
-gazedata_train = gazedataset(impaths[:400], targets[:400], transform=transformer)
-train_loader = torch.utils.data.DataLoader(gazedata_train, batch_size=2, shuffle=False, num_workers=2)
+gazedata_test = CNN_functions.gazedataset(impaths[int(samples/5*4):int(samples)], 
+                                          targets[int(samples/5*4):int(samples)], 
+                                          transform=transformer,
+                                          target_transform = target_transformer
+                                          )
 
-
-gazedata_test = gazedataset(impaths[400:], targets[400:], transform=transformer)
-test_loader = torch.utils.data.DataLoader(gazedata_test, batch_size=2, shuffle=False, num_workers=2)
+test_loader = torch.utils.data.DataLoader(gazedata_test, 
+                                          batch_size=bs, 
+                                          shuffle=True, 
+                                          num_workers=workers
+                                          )
 
 
 #%%
-gnet = gazenet()
-gnet = gnet.cuda()
+checkpoint = torch.load('models/VGG_custom')
+gazenet = CNN_functions.VGG_homemade()
+gazenet.load_state_dict(checkpoint['model_state_dict'])
+gazenet.features.requires_grad_ = False
+#%%
+
+
+
+gazenet.to(device)
 loss_fn = torch.nn.MSELoss()
-optimizer = optim.Adam(gnet.parameters(),lr=0.001)
+optimizer = optim.Adam(gazenet.parameters(),lr=0.001)
 
 train_losses=[]
 valid_losses=[]
 
 
-epochs = 1
+epochs = 10
 if __name__ == '__main__':
-    for epoch in range(epochs):
+    for epoch in range(0, epochs):
         train_loss=0.0
         valid_loss=0.0
-        gnet.train()
+        gazenet.train()
         for idx, (X, y) in enumerate(train_loader):
             print("training batch: ", idx)
             X = X.to(device)
@@ -138,7 +115,7 @@ if __name__ == '__main__':
             # print("here")
             optimizer.zero_grad()
             # print("there")
-            predict = gnet(X)   
+            predict = gazenet(X)   
             # print("get")
             loss=loss_fn(predict,y)
             # print("jefe")
@@ -151,13 +128,13 @@ if __name__ == '__main__':
             #     print("stopping train after batch: ", idx)
             #     break   
         with torch.no_grad():
-            gnet.eval()
+            gazenet.eval()
             for idx_t, (X_test, y_test) in enumerate(test_loader):
                 X_test = X_test.to(device)
                 y_test = y_test.to(device)
                 # if idx_t < 2:
                 print("testing batch: ", idx_t)
-                predict_test = gnet(X_test)
+                predict_test = gazenet(X_test)
                 loss = loss_fn(predict_test, y_test)
                 valid_loss+=loss.item()*X_test.size(0)
                 # else:
@@ -165,19 +142,20 @@ if __name__ == '__main__':
                 #     break
         train_loss=train_loss/len(train_loader.sampler) 
         valid_loss=valid_loss/len(test_loader.sampler)
+        print(train_loss, valid_loss)
         train_losses.append(train_loss)
         valid_losses.append(valid_loss)
+
         
 print("done")
 #%%
 
 print(valid_losses, train_losses)
-
 print(predict_test.cpu().detach().numpy()[0])
 
-# preview = predict_test.cpu().detach().numpy()[0]
 
 #%% 500 images = 30sec
+torch.save(gazenet.state_dict(), "models/test")
 
 
 # t0 = time.time()
@@ -185,41 +163,4 @@ print(predict_test.cpu().detach().numpy()[0])
 # t1 = time.time()
 # print(t1-t0)
 
-#%% Mock examples
-"""
-notes: normalize pixel values for efficiency?
-    - test this
-    
-different shape&size input?
-    - 
-    
-different shape&size output?
-    - Deepfix paper read 
-    
-very carefully consider the gaussian function (and its params) in use. Right now just copy pasta, but has a lot of impact.
-    - 
-    
-What kind of accuracy/loss criterion?
-    - 
-
-
-uncomment lines below to test compute_heatmap() in a ... not functional way
-"""
-# dims = (1280, 960)
-# s_index = 45
-# trial = 4
-
-# filedata = df.loc[(df.SUBJECTINDEX == s_index) & (df.trial == trial)]
-
-# cat = int(filedata.category.iloc[0])
-# filenr = int(filedata.filenumber.iloc[0])
-
-# _, ext = os.path.splitext(os.listdir('../../Datasets/nature_dataset/{}/'.format(cat))[-1]) #Yes, I know this isn't exactly codeporn
-# imgpath = '../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext)
-# img = Image.open('../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext))
-
-
-# fixations = np.array((filedata.start, filedata.end, np.abs(filedata.start-filedata.end), filedata.x, filedata.y)).T
-
-# draw_heatmap(fixations, dims, imagefile=imgpath)
 
