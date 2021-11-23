@@ -35,12 +35,6 @@ for key in baseline.keys():
     df_baseline[key] = pd.Series(baseline[key])
     
 #%%
-# subject_index = 1
-# trial_number = 2
-# name_of_experiment = 'Baseline'
-
-# f, hm = gaze_functions.compute_heatmap(df = df_baseline, s_index = subject_index, s_trial = trial_number, experiment = name_of_experiment)
-#%%
 tr_pr_su = 1
 
 su, tr = gaze_functions.get_subject_trial(df_baseline)
@@ -59,25 +53,25 @@ heatmaps = gaze_functions.compute_heatmap(df = df_baseline,
 
 #%%
 
-np.save()
-
-
-#%%
-
 impaths, heatmaps = gaze_functions.remove_invalid_paths(impaths, heatmaps)
+
+np.save('impaths.npy', impaths)
+np.save('heatmaps.npy', heatmaps)
+
 
 #%% 
 transformer = transforms.Compose([transforms.Resize(256), 
                             transforms.CenterCrop(224), 
-                            transforms.ToTensor() , 
+                            transforms.ToTensor(), 
                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                             ])
 
-target_transformer = transforms.Compose([transforms.ToTensor(), 
-                                         transforms.Resize(256),
-                                         transforms.CenterCrop(224)
+target_transformer = transforms.Compose([transforms.Resize(256),
+                                         transforms.CenterCrop(224), 
+                                         transforms.Normalize(mean=[0.5], std=[0.5])
                                          ])
 
+#%%
 targets = (heatmaps-np.min(heatmaps))* (1/(np.max(heatmaps)-np.min(heatmaps)))
 
 samples = len(impaths)
@@ -176,6 +170,11 @@ torch.save(gazenet.state_dict(), "models/test")
 
 #%%
 
+# subject_index = 1
+# trial_number = 2
+# name_of_experiment = 'Baseline'
+
+# f, hm = gaze_functions.compute_heatmap(df = df_baseline, s_index = subject_index, s_trial = trial_number, experiment = name_of_experiment)
 
 
 

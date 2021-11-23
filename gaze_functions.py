@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot, image
 import os
+import time
 
 meta = pd.read_csv('../../Datasets/nature_dataset/meta.csv', sep='; ', engine='python')
 
@@ -51,8 +52,7 @@ def remove_invalid_paths(paths, heatmaps):
             heatmaps = np.delete(heatmaps, idx, axis = 0)
             del paths[idx]
     return paths, heatmaps
-
-
+        
 def compute_heatmap(df, s_index, s_trial, experiment = None, last_tr=None, draw=True): 
     
     """
@@ -63,10 +63,9 @@ def compute_heatmap(df, s_index, s_trial, experiment = None, last_tr=None, draw=
     """
     
     # function to prepare data in DF and images in numbered folders for draw_heatmap function
-    
     # Dimensions of monitor for experiment in question
     screendims = list(map(int, meta[meta.columns[-9]][meta.Name == experiment].str.split('x').iloc[0]))
-    
+
     # Gaze data for Subject & Trial
     if type(s_index) == int and type(s_trial) == int:
         df = df.loc[(df.SUBJECTINDEX == s_index) & (df.trial == s_trial)]
@@ -96,7 +95,7 @@ def compute_heatmap(df, s_index, s_trial, experiment = None, last_tr=None, draw=
      
         if last_tr == None:
             last_tr == 'all'
-        print("retuning {} heatmaps for each of the {} subjects for a total of {} samples".format(last_tr, len(s_index), len(heatmaps)))
+        print("returning {} heatmaps for each of the {} subjects for a total of {} samples".format(last_tr, len(s_index), len(heatmaps)))
         return heatmaps
                 
 
@@ -179,7 +178,6 @@ def draw_heatmap(fixations, dispsize, imagefile=None, durationweight=True, alpha
             heatmap[y:y+gwh,x:x+gwh] += gaus * fix['dur'][i]
     # resize heatmap
     heatmap = heatmap[np.newaxis, strt:dispsize[1]+strt,strt:dispsize[0]+strt]
-    
     # IMAGE
     if draw:
         fig, ax = draw_display(dispsize, imagefile=imagefile)
