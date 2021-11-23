@@ -4,7 +4,6 @@ from matplotlib import pyplot, image
 import os
 
 meta = pd.read_csv('../../Datasets/nature_dataset/meta.csv', sep='; ', engine='python')
-# def calculate_heatmaps( )
 
 def get_subject_trial(df):
     subjects = list(df.SUBJECTINDEX.unique())
@@ -13,9 +12,6 @@ def get_subject_trial(df):
         trials.append(df[df.SUBJECTINDEX==subject].trial.unique())
     return subjects, trials
 
-
-
-    
 
 def image_paths(df, subjects, trials, last_tr=None):
     """
@@ -52,7 +48,7 @@ def remove_invalid_paths(paths, heatmaps):
     """ 
     for idx, path in enumerate(paths):
         if not os.path.exists(path):
-            del heatmaps[idx]
+            heatmaps = np.delete(heatmaps, idx, axis = 0)
             del paths[idx]
     return paths, heatmaps
 
@@ -86,13 +82,21 @@ def compute_heatmap(df, s_index, s_trial, experiment = None, last_tr=None, draw=
     
     else: 
         draw=False
-        heatmaps = []
+        heatmaps = None
+        
         for s in s_index:
-            print(s, last_tr)
             for t in s_trial[int(s)-1][:last_tr]:
                 df_t = df.loc[(df.SUBJECTINDEX == s) & (df.trial == t)]
                 fixations = np.array((df_t.start, df_t.end, np.abs(df_t.start-df_t.end), df_t.x, df_t.y)).T
-                heatmaps.append(draw_heatmap(fixations, screendims, imagefile=None, draw=draw))
+                heatmap = draw_heatmap(fixations, screendims, imagefile=None, draw=draw)
+                if (s == s_index[0]) and (t == s_trial[0][0]):
+                    heatmaps = heatmap
+                else:
+                    heatmaps = np.append(heatmaps, heatmap, axis = 0)
+     
+        if last_tr == None:
+            last_tr == 'all'
+        print("retuning {} heatmaps for each of the {} subjects for a total of {} samples".format(last_tr, len(s_index), len(heatmaps)))
         return heatmaps
                 
 
@@ -174,7 +178,7 @@ def draw_heatmap(fixations, dispsize, imagefile=None, durationweight=True, alpha
             # add Gaussian to the current heatmap
             heatmap[y:y+gwh,x:x+gwh] += gaus * fix['dur'][i]
     # resize heatmap
-    heatmap = heatmap[strt:dispsize[1]+strt,strt:dispsize[0]+strt]
+    heatmap = heatmap[np.newaxis, strt:dispsize[1]+strt,strt:dispsize[0]+strt]
     
     # IMAGE
     if draw:

@@ -2,11 +2,23 @@ import h5py
 import pandas as pd
 import gaze_functions
 import torch
+import numpy as np
 from torchvision import transforms
 import torch.optim as optim
 import CNN_functions
 from PIL import Image
 import matplotlib.pyplot as plt
+#%%
+
+
+checkpoint = torch.load('models/VGG_custom')
+gazenet = CNN_functions.VGG_homemade()
+gazenet.load_state_dict(checkpoint['model_state_dict'])
+for param in gazenet.features.parameters():
+    param.requires_grad = False
+
+
+
 #%% #Collection of datasets
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 # device = torch.device('cpu')
@@ -29,15 +41,29 @@ for key in baseline.keys():
 
 # f, hm = gaze_functions.compute_heatmap(df = df_baseline, s_index = subject_index, s_trial = trial_number, experiment = name_of_experiment)
 #%%
-tr_pr_su = 25
+tr_pr_su = 1
 
 su, tr = gaze_functions.get_subject_trial(df_baseline)
 
+impaths = gaze_functions.image_paths(df_baseline, 
+                                     su, 
+                                     tr, 
+                                     last_tr = tr_pr_su)
 
+heatmaps = gaze_functions.compute_heatmap(df = df_baseline, 
+                                          s_index = su, 
+                                          s_trial = tr, 
+                                          experiment = 'Baseline', 
+                                          last_tr= tr_pr_su, 
+                                          draw=False)
 
-impaths = gaze_functions.image_paths(df_baseline, su, tr, last_tr = tr_pr_su)
-heatmaps = gaze_functions.compute_heatmap(df = df_baseline, s_index = su, s_trial = tr, experiment = 'Baseline', last_tr= tr_pr_su, draw=False)
 #%%
+
+np.save()
+
+
+#%%
+
 impaths, heatmaps = gaze_functions.remove_invalid_paths(impaths, heatmaps)
 
 #%% 
@@ -52,11 +78,10 @@ target_transformer = transforms.Compose([transforms.ToTensor(),
                                          transforms.CenterCrop(224)
                                          ])
 
-# targets_scaled = (heatmaps-np.min(heatmaps))* (1/(np.max(heatmaps)-np.min(heatmaps)))
-targets = heatmaps
+targets = (heatmaps-np.min(heatmaps))* (1/(np.max(heatmaps)-np.min(heatmaps)))
 
 samples = len(impaths)
-bs = 2
+bs = 16
 workers = 2
 
 gazedata_train = CNN_functions.gazedataset(impaths[:int(samples/5*4)], 
@@ -86,17 +111,10 @@ test_loader = torch.utils.data.DataLoader(gazedata_test,
 
 
 #%%
-checkpoint = torch.load('models/VGG_custom')
-gazenet = CNN_functions.VGG_homemade()
-gazenet.load_state_dict(checkpoint['model_state_dict'])
-gazenet.features.requires_grad_ = False
-#%%
-
-
 
 gazenet.to(device)
 loss_fn = torch.nn.MSELoss()
-optimizer = optim.Adam(gazenet.parameters(),lr=0.001)
+optimizer = optim.SGD(gazenet.parameters(),lr=0.1, momentum=0.9, weight_decay=2e-7)
 
 train_losses=[]
 valid_losses=[]
@@ -105,11 +123,11 @@ valid_losses=[]
 epochs = 10
 if __name__ == '__main__':
     for epoch in range(0, epochs):
+        print("starting epoch: {}".format(epoch))
         train_loss=0.0
         valid_loss=0.0
         gazenet.train()
         for idx, (X, y) in enumerate(train_loader):
-            print("training batch: ", idx)
             X = X.to(device)
             y = y.to(device)
             # print("here")
@@ -133,7 +151,6 @@ if __name__ == '__main__':
                 X_test = X_test.to(device)
                 y_test = y_test.to(device)
                 # if idx_t < 2:
-                print("testing batch: ", idx_t)
                 predict_test = gazenet(X_test)
                 loss = loss_fn(predict_test, y_test)
                 valid_loss+=loss.item()*X_test.size(0)
@@ -142,7 +159,7 @@ if __name__ == '__main__':
                 #     break
         train_loss=train_loss/len(train_loader.sampler) 
         valid_loss=valid_loss/len(test_loader.sampler)
-        print(train_loss, valid_loss)
+        print("loss in training: {}, loss in validation: {}".format(train_loss, valid_loss))
         train_losses.append(train_loss)
         valid_losses.append(valid_loss)
 
@@ -150,12 +167,16 @@ if __name__ == '__main__':
 print("done")
 #%%
 
-print(valid_losses, train_losses)
-print(predict_test.cpu().detach().numpy()[0])
+print("training losses from start to end: {}, validation losses from start to end: {}".format(train_losses, valid_losses))
+# print(predict_test.cpu().detach().numpy()[0])
 
 
 #%% 500 images = 30sec
 torch.save(gazenet.state_dict(), "models/test")
+
+#%%
+
+
 
 
 # t0 = time.time()

@@ -49,7 +49,7 @@ torch.save({
 
 
 #%%
-checkpoint = torch.load('C:/Users/Sebastian/Desktop/CS3/Code/saliencyPrediction/models/VGG_custom')
+checkpoint = torch.load('models/VGG_custom')
 #%% Transformer to conform with VGG requirements
 
 trans = transforms.Compose([transforms.Resize(256), 
