@@ -107,8 +107,9 @@ test_loader = torch.utils.data.DataLoader(gazedata_test,
 #%%
 
 gazenet.to(device)
-loss_fn = torch.nn.MSELoss()
-optimizer = optim.SGD(gazenet.parameters(),lr=0.1, momentum=0.9, weight_decay=2e-7)
+
+loss_fn = torch.nn.MSELoss() #Euclidean, MSEloss, CrossEntropy
+optimizer = optim.SGD(gazenet.parameters(),lr=0.1, momentum=0.9, weight_decay=2e-7) #SGD, ADAM 
 
 train_losses=[]
 valid_losses=[]
@@ -166,7 +167,15 @@ print("training losses from start to end: {}, validation losses from start to en
 
 
 #%% 500 images = 30sec
-torch.save(gazenet.state_dict(), "models/test")
+
+torch.save({
+            'epoch': epoch,
+            'model_state_dict': VGG_custom.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            'loss': loss,
+            }, "models/test"
+    )
+
 
 #%%
 

@@ -1,6 +1,5 @@
 import h5py
 import pandas as pd
-import gaze_functions
 import numpy as np
 import time
 import torch
@@ -20,6 +19,9 @@ for key in baseline.keys():
 class heatmapper:
     def __init__(self, dataframe, screen_dimensions, parse=True):
         """
+        
+        need to add: DRAW function
+        
         screen_dimensions : tuple or string
         string == experiment name (such as 'Baseline')
         tuple == dimensions (such as (1280, 960))
@@ -27,7 +29,6 @@ class heatmapper:
         """
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.discards = 0
-        # self.device = torch.device('cpu')
         self.df = dataframe
         self.subjects = dataframe.SUBJECTINDEX.unique()
         self.trials = [dataframe[dataframe.SUBJECTINDEX == sub].trial.iloc[-1] for sub in self.subjects]
@@ -61,7 +62,6 @@ class heatmapper:
             for trial_idx in range(0, int(triallist[sub_idx])):
                 try:
                     df_temp = df.loc[(df.SUBJECTINDEX == subject) & (df.trial == trial_idx+1)]
-                    # print(df_temp)
                     cat, filenr = int(df_temp.category.iloc[0]), int(df_temp.filenumber.iloc[0])
                     _, ext = os.path.splitext(os.listdir('../../Datasets/nature_dataset/{}/'.format(cat))[-1])
                     path = '../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext)
@@ -84,7 +84,7 @@ class heatmapper:
         else:
             return fixinfo
 
-    def compute(self, count, gwh = 200, gsdwh = 6):
+    def compute(self, count, gwh = 100, gsdwh = 6):
         if type(count) == int:
             fixationlist = self.fixations[:count]
         
@@ -94,7 +94,7 @@ class heatmapper:
         heatmaps = torch.empty((len(fixationlist),1 , self.dims[1], self.dims[0]), device=self.device)
         gsdwh = gwh/6
         gaus = self._gaussian_(gwh, gsdwh)
-    
+        
         strt = int(gwh/2)
         heatmapsize = int(self.dims[1] + 2*strt), int(self.dims[0] + 2*strt)
         for idx, fix in enumerate(fixationlist):
@@ -119,10 +119,11 @@ class heatmapper:
                     try:
                         heatmap[y:y+vadj[1],x:x+hadj[1]] += gaus[vadj[0]:vadj[1],hadj[0]:hadj[1]] * fix[:,2][i]
                     except:
-
                         pass
                 else:                
                     heatmap[y:y+gwh,x:x+gwh] += gaus * fix[:,2][i]
+                    
+            ### ADD 0-255 (or 0-1?) SCALING FOR EACH HEATMAP... or for entire set of heatmaps??
             heatmaps[idx] = heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt]
             torch.cuda.empty_cache()
         return heatmaps
@@ -132,11 +133,11 @@ class heatmapper:
 t0 = time.time()
 mappy = heatmapper(df_baseline, (1280, 960))
 t1 = time.time()
-print(t1-t0)
+print("time to parse entire dataset:", t1-t0)
 #%%
 
 t0 = time.time()
-heatmaps = mappy.compute(count=(3, 15))
+heatmaps = mappy.compute(count=(0, 10))
 t1 = time.time()
-print(t1-t0)
+print("time to compute 10 heatmaps:", t1-t0)
 #%%

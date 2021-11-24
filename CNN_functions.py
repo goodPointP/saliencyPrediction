@@ -74,21 +74,6 @@ def decoder(layers = None,
             input_size = layer
     return nn.Sequential(*sequence)
 
-class standard_conv(nn.Module): 
-    """
-    Based on https://github.com/MichiganCOG/TASED-Net/blob/master/model.py
-    """
-    def __init__(self, in_size, out_size, kernel, stri, pad):
-        super(standard_conv, self).__init__()
-        self.conv = nn.Conv2d(in_size, out_size, kernel, stri, pad)
-        self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
-        self.relu = nn.ReLU()
-    
-    def forward(self, x):
-        x = self.conv(x)
-        x = self.bn(x)
-        x = self.relu(x)
-        return x
 
 class VGG_homemade(nn.Module):
     """ VGG implementation to be in control of params, but otherwise completely based on the original architecture
@@ -146,3 +131,19 @@ class gazedataset(torch.utils.data.Dataset):
             label = self.target_transform(label).type(image.type())
         return image, label
 
+
+class standard_conv(nn.Module): 
+    """
+    Based on https://github.com/MichiganCOG/TASED-Net/blob/master/model.py
+    """
+    def __init__(self, in_size, out_size, kernel, stri, pad):
+        super(standard_conv, self).__init__()
+        self.conv = nn.Conv2d(in_size, out_size, kernel, stri, pad)
+        self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
+        self.relu = nn.ReLU()
+    
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.relu(x)
+        return x

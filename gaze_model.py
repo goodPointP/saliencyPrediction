@@ -22,7 +22,7 @@ cfg_up = [2, "bicubic", False]
 
 classifier = CNN_functions.decoder(layers=cfg_decode, conv_params=convolution_settings, upsampler=cfg_up, input_size=512, relu=True)
     
-VGG_custom = CNN_functions.VGG_homemade(features)
+VGG_custom = CNN_functions.VGG_homemade(features, preset=False)
 
 #%% Initializing weights BEFORE adding new classifier
 base_state_dict = vgg_base.state_dict()
@@ -75,8 +75,8 @@ with torch.no_grad():
 
 #%% Outputs
 
-proba = torch.nn.functional.softmax(output_base[0], dim=0)
-proba_test = torch.nn.functional.softmax(output_custom[0], dim=0)
+# proba = torch.nn.functional.softmax(output_base[0], dim=0)
+# proba_custom = torch.nn.functional.softmax(output_custom[0], dim=0)
 
 
 
