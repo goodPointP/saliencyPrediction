@@ -3,6 +3,15 @@ A project for Cognitive Science 3, 2021
 
 Instance segmentation (for images)
 
+HEATMAP SETTINGS
+
+LOSS + OPTIMIZER
+
+CLASSIFIER (LAST CNN LAYERS) SETUP
+
+--> RUN CODE
+
+
 https://www.analyticsvidhya.com/blog/2019/04/introduction-image-segmentation-techniques-python/
 
 https://github.com/facebookresearch/detectron2
