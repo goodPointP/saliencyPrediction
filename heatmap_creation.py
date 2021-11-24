@@ -69,7 +69,7 @@ class heatmapper:
                         paths.append(path)
                         fixinfo.append(torch.Tensor((np.array((df_temp.x.values, 
                                                                df_temp.y.values, 
-                                                               np.abs(df_temp.start-df_temp.end).values)))).to(self.device).T)
+                                                               np.abs(df_temp.start-df_temp.end).values/100)))).to(self.device).T)
                     else:
                         self.discards += 1
                         pass
@@ -84,15 +84,15 @@ class heatmapper:
         else:
             return fixinfo
 
-    def compute(self, count, gwh = 100, gsdwh = 6):
+    def compute(self, count, gwh = 200, stddev = 6):
         if type(count) == int:
             fixationlist = self.fixations[:count]
         
         if type(count) == tuple:
             fixationlist = self.fixations[count[0]:count[1]]
         
-        heatmaps = torch.empty((len(fixationlist),1 , self.dims[1], self.dims[0]), device=self.device)
-        gsdwh = gwh/6
+        heatmaps = torch.empty((len(fixationlist), 1, self.dims[1], self.dims[0]), device=self.device)
+        gsdwh = gwh/stddev
         gaus = self._gaussian_(gwh, gsdwh)
         
         strt = int(gwh/2)
