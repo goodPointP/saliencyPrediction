@@ -11,6 +11,9 @@ CLASSIFIER (LAST CNN LAYERS) SETUP
 
 --> RUN CODE
 
+TLDR on papers:
+https://docs.google.com/document/d/1j7hx9PnsY-M0PakVxuyMlszC2uSiuI_3QFVEOQ7Q0bA/edit?usp=sharing
+
 
 https://www.analyticsvidhya.com/blog/2019/04/introduction-image-segmentation-techniques-python/
 
