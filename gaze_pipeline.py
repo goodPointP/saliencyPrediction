@@ -81,7 +81,7 @@ test_loader = torch.utils.data.DataLoader(gazedata_test,
 
 gazenet.to(device)
 
-loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414]))
+loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414]), device=device)
 optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9,weight_decay=0.0005)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
 train_losses=[]
