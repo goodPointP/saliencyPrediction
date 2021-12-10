@@ -60,5 +60,5 @@ test_loader = torch.utils.data.DataLoader(gazedata_test,
                                           num_workers=workers
                                           )
 
-torch.save('test_loader.pt', test_loader)
-torch.save('train_loader.pt', train_loader)
+torch.save(test_loader,'test_loader.pt')
+torch.save(train_loader, 'train_loader.pt')
