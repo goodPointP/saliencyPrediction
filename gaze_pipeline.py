@@ -40,7 +40,7 @@ mappy = heatmapper(df_baseline, (1280, 960))
 
 #%%
 impaths = mappy.paths
-targets = np.load('heatmaps_full.npz')['heatmaps']
+targets = torch.tensor(np.load('heatmaps_full.npz')['heatmaps'])
 #%% 
 transformer = transforms.Compose([transforms.Resize(256), 
                             transforms.CenterCrop(224), 
@@ -48,10 +48,7 @@ transformer = transforms.Compose([transforms.Resize(256),
                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                             ])
 
-target_transformer = transforms.Compose([transforms.ToTensor()
-                                         ])
-
-
+   
 samples = len(impaths)
 bs = 16
 workers = 2
@@ -59,7 +56,6 @@ workers = 2
 gazedata_train = CNN_functions.gazedataset(impaths[:int(samples/5*4)], 
                                            targets[:int(samples/5*4)], 
                                            transform=transformer,
-                                           target_transform = target_transformer
                                            )
 
 train_loader = torch.utils.data.DataLoader(gazedata_train, 
@@ -72,7 +68,6 @@ train_loader = torch.utils.data.DataLoader(gazedata_train,
 gazedata_test = CNN_functions.gazedataset(impaths[int(samples/5*4):int(samples)], 
                                           targets[int(samples/5*4):int(samples)], 
                                           transform=transformer,
-                                          target_transform = target_transformer
                                           )
 
 test_loader = torch.utils.data.DataLoader(gazedata_test, 
@@ -148,10 +143,11 @@ print("training losses from start to end: {}, validation losses from start to en
 
 torch.save({
             'epoch': epoch,
-            'model_state_dict': VGG_custom.state_dict(),
+            'model_state_dict': gazenet.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
+            'scheduler': scheduler.state_dict(),
             'loss': loss,
-            }, "models/test"
+            }, "models/gazenet_post_train"
     )
 
 
