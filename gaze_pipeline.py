@@ -8,10 +8,11 @@ import torch.optim as optim
 import CNN_functions
 from PIL import Image
 import matplotlib.pyplot as plt
+from heatmap_creation import heatmapper
 #%%
 
 
-checkpoint = torch.load('models/VGG_custom')
+checkpoint = torch.load('models/gazenet')
 gazenet = CNN_functions.VGG_homemade()
 gazenet.load_state_dict(checkpoint['model_state_dict'])
 for param in gazenet.features.parameters():
@@ -21,7 +22,6 @@ for param in gazenet.features.parameters():
 
 #%% #Collection of datasets
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-# device = torch.device('cpu')
 collection = h5py.File('../../Datasets/nature_dataset/etdb_v1.0.hdf5')
 
 #%%  access a given dataset 
@@ -35,30 +35,12 @@ for key in baseline.keys():
     df_baseline[key] = pd.Series(baseline[key])
     
 #%%
-tr_pr_su = 1
 
-su, tr = gaze_functions.get_subject_trial(df_baseline)
-
-impaths = gaze_functions.image_paths(df_baseline, 
-                                     su, 
-                                     tr, 
-                                     last_tr = tr_pr_su)
-
-heatmaps = gaze_functions.compute_heatmap(df = df_baseline, 
-                                          s_index = su, 
-                                          s_trial = tr, 
-                                          experiment = 'Baseline', 
-                                          last_tr= tr_pr_su, 
-                                          draw=False)
+mappy = heatmapper(df_baseline, (1280, 960))
 
 #%%
-
-impaths, heatmaps = gaze_functions.remove_invalid_paths(impaths, heatmaps)
-
-np.save('impaths.npy', impaths)
-np.save('heatmaps.npy', heatmaps)
-
-
+impaths = mappy.paths
+targets = np.load('heatmaps_full.npz')['heatmaps']
 #%% 
 transformer = transforms.Compose([transforms.Resize(256), 
                             transforms.CenterCrop(224), 
@@ -66,13 +48,9 @@ transformer = transforms.Compose([transforms.Resize(256),
                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                             ])
 
-target_transformer = transforms.Compose([transforms.Resize(256),
-                                         transforms.CenterCrop(224), 
-                                         transforms.Normalize(mean=[0.5], std=[0.5])
+target_transformer = transforms.Compose([transforms.ToTensor()
                                          ])
 
-#%%
-targets = (heatmaps-np.min(heatmaps))* (1/(np.max(heatmaps)-np.min(heatmaps)))
 
 samples = len(impaths)
 bs = 16
@@ -108,14 +86,14 @@ test_loader = torch.utils.data.DataLoader(gazedata_test,
 
 gazenet.to(device)
 
-loss_fn = torch.nn.MSELoss() #Euclidean, MSEloss, CrossEntropy
-optimizer = optim.SGD(gazenet.parameters(),lr=0.1, momentum=0.9, weight_decay=2e-7) #SGD, ADAM 
-
+loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414]))
+optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9,weight_decay=0.0005)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
 train_losses=[]
 valid_losses=[]
 
 
-epochs = 10
+epochs = 2
 if __name__ == '__main__':
     for epoch in range(0, epochs):
         print("starting epoch: {}".format(epoch))
@@ -134,7 +112,7 @@ if __name__ == '__main__':
             # print("jefe")
             loss.backward()
             
-            optimizer.step()
+            scheduler.step()
             train_loss+=loss.item()*X.size(0)
             torch.cuda.empty_cache()
             # if idx > 10:

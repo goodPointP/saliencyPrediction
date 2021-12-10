@@ -4,18 +4,7 @@ import numpy as np
 import time
 import torch
 import os
-#%%
 
-
-collection = h5py.File('../../Datasets/nature_dataset/etdb_v1.0.hdf5')
-#%%
-baseline = collection['Baseline'] 
-
-df_baseline = pd.DataFrame()
-for key in baseline.keys():
-    df_baseline[key] = pd.Series(baseline[key])
-
-#%%
 
 class heatmapper:
     def __init__(self, dataframe, screen_dimensions, parse=True):
@@ -45,7 +34,7 @@ class heatmapper:
         self.dims = (int(original_dims[0]*self.scale[0]), int(original_dims[1]*self.scale[1]))
         
         if parse == True:
-            self.fixations = self._parser(self.df, self.subjects, self.trials)
+            self.fixations, self.paths = self._parser(self.df, self.subjects, self.trials)
             
         
     
@@ -90,7 +79,7 @@ class heatmapper:
         if debug == True:
             return fixinfo, index_errors
         else:
-            return fixinfo
+            return fixinfo, paths
 
     def compute(self, count = None, gwh = 40, stddev = 6):
         if type(count) == int:
@@ -150,18 +139,3 @@ class heatmapper:
             del heatmap
             torch.cuda.empty_cache()
         return heatmaps
-
-
-#%%
-t0 = time.time()
-mappy = heatmapper(df_baseline, (1280, 960))
-t1 = time.time()
-print("time to parse entire dataset:", t1-t0)
-#%%
-
-t0 = time.time()
-heatmaps = mappy.compute()
-t1 = time.time()
-np.savez('heatmaps.npz', heatmaps = heatmaps)
-print("time to compute heatmaps:", t1-t0)
-#%%
