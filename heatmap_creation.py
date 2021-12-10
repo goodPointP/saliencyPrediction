@@ -94,13 +94,18 @@ class heatmapper:
         if count == None:
             fixationlist = self.fixations
         
-        heatmaps = torch.empty((len(fixationlist), 1, self.dims[1], self.dims[0]))
+        checkpoints = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000]
+        # heatmaps = torch.empty((len(fixationlist), 1, self.dims[1], self.dims[0]))
+        heatmaps = []
         gsdwh = gwh/stddev
         gaus = self._gaussian_(gwh, gsdwh)
         
         strt = int(gwh/2)
         heatmapsize = int(self.dims[1] + 2*strt), int(self.dims[0] + 2*strt)
         for idx, fix in enumerate(fixationlist):
+            if idx in checkpoints:
+                np.savez('heatmaps_up_to:{}.npz'.format(idx), heatmaps=heatmaps)
+                heatmaps = []
             heatmap = torch.empty(heatmapsize, dtype=float, device=self.device)
             for i in range(0,len(fix)):
 
@@ -127,7 +132,8 @@ class heatmapper:
                     heatmap[y:y+gwh,x:x+gwh] += gaus * fix[:,2][i]
                     
             ### ADD 0-255 (or 0-1?) SCALING FOR EACH HEATMAP... or for entire set of heatmaps??
-            heatmaps[idx] = (heatmap.cpu()[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int)
+            # heatmaps[idx] = (heatmap.cpu()[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int)
+            heatmaps.append((heatmap.cpu()[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int))
             del heatmap
             torch.cuda.empty_cache()
         return heatmaps
