@@ -84,12 +84,15 @@ class heatmapper:
         else:
             return fixinfo
 
-    def compute(self, count, gwh = 200, stddev = 6):
+    def compute(self, count = None, gwh = 200, stddev = 6):
         if type(count) == int:
             fixationlist = self.fixations[:count]
         
         if type(count) == tuple:
             fixationlist = self.fixations[count[0]:count[1]]
+        
+        if count == None:
+            fixationlist = self.fixations
         
         heatmaps = torch.empty((len(fixationlist), 1, self.dims[1], self.dims[0]), device=self.device)
         gsdwh = gwh/stddev
@@ -139,5 +142,6 @@ print("time to parse entire dataset:", t1-t0)
 t0 = time.time()
 heatmaps = mappy.compute(count=(0, 10))
 t1 = time.time()
+np.savez('heatmaps.npz', heatmaps)
 print("time to compute 10 heatmaps:", t1-t0)
 #%%
