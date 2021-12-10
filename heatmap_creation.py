@@ -103,9 +103,14 @@ class heatmapper:
         strt = int(gwh/2)
         heatmapsize = int(self.dims[1] + 2*strt), int(self.dims[0] + 2*strt)
         for idx, fix in enumerate(fixationlist):
+            if idx % 1000:
+                print("computed {} heatmaps".format(idx))
+            
             if idx in checkpoints:
                 np.savez('heatmaps_up_to:{}.npz'.format(idx), heatmaps=heatmaps)
+                print("saving at checkpoint: {}".format(idx))
                 heatmaps = []
+                
             heatmap = torch.empty(heatmapsize, dtype=float, device=self.device)
             for i in range(0,len(fix)):
 
