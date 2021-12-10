@@ -34,8 +34,8 @@ transformer = transforms.Compose([transforms.Resize(256),
 
    
 samples = len(impaths)
-bs = 16
-workers = 2
+bs = 32
+workers = 10
 
 gazedata_train = CNN_functions.gazedataset(impaths[:int(samples/5*4)], 
                                            targets[:int(samples/5*4)], 
