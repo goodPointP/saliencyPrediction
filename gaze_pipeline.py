@@ -104,8 +104,7 @@ if __name__ == '__main__':
             loss=loss_fn(predict,y)
             
             loss.backward()
-            
-            scheduler.step()
+            optimizer.step()
             train_loss+=loss.item()*X.size(0)
             torch.cuda.empty_cache()
 
@@ -118,6 +117,8 @@ if __name__ == '__main__':
                 predict_test = gazenet(X_test)
                 loss = loss_fn(predict_test, y_test)
                 valid_loss+=loss.item()*X_test.size(0)
+                scheduler.step(valid_loss)
+
                 # else:
                 #     print("stopping eval")
                 #     break
