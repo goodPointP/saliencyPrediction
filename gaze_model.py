@@ -45,7 +45,7 @@ torch.save({
             'model_state_dict': VGG_custom.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss,
-            }, 'C:/Users/Sebastian/Desktop/CS3/Code/saliencyPrediction/models/VGG_custom')
+            }, 'models/VGG_custom')
 
 
 # #%%
