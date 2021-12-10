@@ -97,27 +97,23 @@ if __name__ == '__main__':
         gazenet.train()
         for idx, (X, y) in enumerate(train_loader):
             X = X.to(device)
-            y = y.to(device)
-            # print("here")
+            y = y.to(device).float()
+            
             optimizer.zero_grad()
-            # print("there")
             predict = gazenet(X)   
-            # print("get")
             loss=loss_fn(predict,y)
-            # print("jefe")
+            
             loss.backward()
             
             scheduler.step()
             train_loss+=loss.item()*X.size(0)
             torch.cuda.empty_cache()
-            # if idx > 10:
-            #     print("stopping train after batch: ", idx)
-            #     break   
+
         with torch.no_grad():
             gazenet.eval()
             for idx_t, (X_test, y_test) in enumerate(test_loader):
                 X_test = X_test.to(device)
-                y_test = y_test.to(device)
+                y_test = y_test.to(device).float()
                 # if idx_t < 2:
                 predict_test = gazenet(X_test)
                 loss = loss_fn(predict_test, y_test)
