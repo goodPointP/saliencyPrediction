@@ -127,7 +127,7 @@ class heatmapper:
                     heatmap[y:y+gwh,x:x+gwh] += gaus * fix[:,2][i]
                     
             ### ADD 0-255 (or 0-1?) SCALING FOR EACH HEATMAP... or for entire set of heatmaps??
-            heatmaps[idx] = heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt]
+            heatmaps[idx] = (heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int)
             torch.cuda.empty_cache()
         return heatmaps.cpu()
 
@@ -142,6 +142,6 @@ print("time to parse entire dataset:", t1-t0)
 t0 = time.time()
 heatmaps = mappy.compute(count=(0, 10))
 t1 = time.time()
-np.savez('heatmaps.npz', heatmaps)
+np.savez('heatmaps.npz', heatmaps = heatmaps)
 print("time to compute 10 heatmaps:", t1-t0)
 #%%
