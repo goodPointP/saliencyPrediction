@@ -8,6 +8,7 @@ import os
 
 
 collection = h5py.File('../../Datasets/nature_dataset/etdb_v1.0.hdf5')
+#%%
 baseline = collection['Baseline'] 
 
 df_baseline = pd.DataFrame()
@@ -32,13 +33,20 @@ class heatmapper:
         self.df = dataframe
         self.subjects = dataframe.SUBJECTINDEX.unique()
         self.trials = [dataframe[dataframe.SUBJECTINDEX == sub].trial.iloc[-1] for sub in self.subjects]
+        self.target_dim = 224
+        
         if type(screen_dimensions) == str:
             meta = pd.read_csv('../../Datasets/nature_dataset/meta.csv', sep='; ', engine='python')
-            self.dims = tuple(map(int, meta[meta.columns[-9]][meta.Name == screen_dimensions].str.split('x').iloc[0]))
+            original_dims = tuple(map(int, meta[meta.columns[-9]][meta.Name == screen_dimensions].str.split('x').iloc[0]))
         else:
-            self.dims = screen_dimensions
+            original_dims = screen_dimensions
+            
+        self.scale = (self.target_dim/original_dims[0], self.target_dim/original_dims[1])
+        self.dims = (int(original_dims[0]*self.scale[0]), int(original_dims[1]*self.scale[1]))
+        
         if parse == True:
             self.fixations = self._parser(self.df, self.subjects, self.trials)
+            
         
     
     def _gaussian_(self, x, sx):
@@ -67,8 +75,8 @@ class heatmapper:
                     path = '../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext)
                     if os.path.exists(path):
                         paths.append(path)
-                        fixinfo.append(torch.Tensor((np.array((df_temp.x.values, 
-                                                               df_temp.y.values, 
+                        fixinfo.append(torch.Tensor((np.array((df_temp.x.values*self.scale[0], 
+                                                               df_temp.y.values*self.scale[1], 
                                                                np.abs(df_temp.start-df_temp.end).values/100)))).to(self.device).T)
                     else:
                         self.discards += 1
@@ -84,7 +92,7 @@ class heatmapper:
         else:
             return fixinfo
 
-    def compute(self, count = None, gwh = 200, stddev = 6):
+    def compute(self, count = None, gwh = 40, stddev = 6):
         if type(count) == int:
             fixationlist = self.fixations[:count]
         
@@ -103,7 +111,7 @@ class heatmapper:
         strt = int(gwh/2)
         heatmapsize = int(self.dims[1] + 2*strt), int(self.dims[0] + 2*strt)
         for idx, fix in enumerate(fixationlist):
-            if idx % 1000:
+            if idx % 1000 == 0:
                 print("computed {} heatmaps".format(idx))
             
             if idx in checkpoints:
@@ -155,5 +163,5 @@ t0 = time.time()
 heatmaps = mappy.compute()
 t1 = time.time()
 np.savez('heatmaps.npz', heatmaps = heatmaps)
-print("time to compute 10 heatmaps:", t1-t0)
+print("time to compute heatmaps:", t1-t0)
 #%%
