@@ -128,6 +128,7 @@ class heatmapper:
                     
             ### ADD 0-255 (or 0-1?) SCALING FOR EACH HEATMAP... or for entire set of heatmaps??
             heatmaps[idx] = (heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int)
+            del heatmap
             torch.cuda.empty_cache()
         return heatmaps.cpu()
 
