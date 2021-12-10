@@ -94,7 +94,7 @@ class heatmapper:
         if count == None:
             fixationlist = self.fixations
         
-        heatmaps = torch.empty((len(fixationlist), 1, self.dims[1], self.dims[0]), device=self.device)
+        heatmaps = torch.empty((len(fixationlist), 1, self.dims[1], self.dims[0]))
         gsdwh = gwh/stddev
         gaus = self._gaussian_(gwh, gsdwh)
         
@@ -127,10 +127,10 @@ class heatmapper:
                     heatmap[y:y+gwh,x:x+gwh] += gaus * fix[:,2][i]
                     
             ### ADD 0-255 (or 0-1?) SCALING FOR EACH HEATMAP... or for entire set of heatmaps??
-            heatmaps[idx] = (heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int)
+            heatmaps[idx] = (heatmap.cpu()[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int)
             del heatmap
             torch.cuda.empty_cache()
-        return heatmaps.cpu()
+        return heatmaps
 
 
 #%%
