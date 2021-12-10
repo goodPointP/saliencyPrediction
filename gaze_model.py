@@ -48,30 +48,30 @@ torch.save({
             }, 'C:/Users/Sebastian/Desktop/CS3/Code/saliencyPrediction/models/VGG_custom')
 
 
-#%%
-checkpoint = torch.load('models/VGG_custom')
-#%% Transformer to conform with VGG requirements
+# #%%
+# checkpoint = torch.load('models/VGG_custom')
+# #%% Transformer to conform with VGG requirements
 
-trans = transforms.Compose([transforms.Resize(256), 
-                            transforms.CenterCrop(224), 
-                            transforms.ToTensor(), 
-                            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+# trans = transforms.Compose([transforms.Resize(256), 
+#                             transforms.CenterCrop(224), 
+#                             transforms.ToTensor(), 
+#                             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
 
-#%% Get sample for test
-input_image = PIL.Image.open('C:/Users/Sebastian/Desktop/CS3/Datasets/nature_dataset/8/5.png')
-input_tensor = trans(input_image)
-input_batch = input_tensor.unsqueeze(0) #make 4D (req by torch models) [samples, dims, h, w]
+# #%% Get sample for test
+# input_image = PIL.Image.open('C:/Users/Sebastian/Desktop/CS3/Datasets/nature_dataset/8/5.png')
+# input_tensor = trans(input_image)
+# input_batch = input_tensor.unsqueeze(0) #make 4D (req by torch models) [samples, dims, h, w]
 
-#%% Testing
+# #%% Testing
 
-if torch.cuda.is_available():
-    input_batch = input_batch.to('cuda')
-    vgg_base.to('cuda')
-    VGG_custom.to('cuda')
+# if torch.cuda.is_available():
+#     input_batch = input_batch.to('cuda')
+#     vgg_base.to('cuda')
+#     VGG_custom.to('cuda')
     
-with torch.no_grad():
-    output_base = vgg_base(input_batch)
-    output_custom = VGG_custom(input_batch)
+# with torch.no_grad():
+#     output_base = vgg_base(input_batch)
+#     output_custom = VGG_custom(input_batch)
 
 #%% Outputs
 
