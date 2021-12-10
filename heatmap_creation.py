@@ -140,7 +140,7 @@ print("time to parse entire dataset:", t1-t0)
 #%%
 
 t0 = time.time()
-heatmaps = mappy.compute(count=(0, 10))
+heatmaps = mappy.compute()
 t1 = time.time()
 np.savez('heatmaps.npz', heatmaps = heatmaps)
 print("time to compute 10 heatmaps:", t1-t0)
