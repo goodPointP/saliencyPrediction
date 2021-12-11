@@ -8,8 +8,8 @@ import CNN_functions
 checkpoint = torch.load('models/gazenet')
 gazenet = CNN_functions.VGG_homemade()
 gazenet.load_state_dict(checkpoint['model_state_dict'])
-for param in gazenet.features.parameters():
-    param.requires_grad = False
+# for param in gazenet.features.parameters():
+#     param.requires_grad = False
 
 
 
@@ -25,7 +25,7 @@ gazenet.to(device)
 
 loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device))
 optimizer = optim.SGD(gazenet.parameters(), lr=0.1, momentum=0.9,weight_decay=0.0005)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
+# scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
 train_losses=[]
 valid_losses=[]
 
@@ -69,7 +69,7 @@ if __name__ == '__main__':
                 
                 loss = loss_fn(predict_test, y_test)
                 valid_loss+=loss.item()*X_test.size(0)
-                scheduler.step(valid_loss)
+                # scheduler.step(valid_loss)
 
 
         
@@ -83,7 +83,7 @@ if __name__ == '__main__':
                     'epoch': epoch,
                     'model_state_dict': gazenet.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    'scheduler': scheduler.state_dict(),
+                    # 'scheduler': scheduler.state_dict(),
                     'loss': loss,
                     }, "models/gazenet_mid_train"
             )
@@ -101,7 +101,7 @@ torch.save({
             'epoch': epoch,
             'model_state_dict': gazenet.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            'scheduler': scheduler.state_dict(),
+            # 'scheduler': scheduler.state_dict(),
             'loss': loss,
             }, "models/gazenet_post_train_{}_epochs".format(epochs)
     )
