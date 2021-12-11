@@ -33,8 +33,7 @@ valid_losses=[]
 epochs = 50
 if __name__ == '__main__':
     for epoch in range(0, epochs):
-        print("learning rate: {}".format(scheduler.get_lr()))
-
+        print("learning rate: ", optimizer.param_groups[0]['lr'])
         print("starting epoch: {}".format(epoch))
         
         train_loss=0.0
@@ -53,6 +52,8 @@ if __name__ == '__main__':
             loss.backward()
             
             train_loss+=loss.item()*X.size(0)
+            
+            optimizer.step()
             scheduler.step(train_loss)
 
             torch.cuda.empty_cache()
