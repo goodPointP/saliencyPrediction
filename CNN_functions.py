@@ -34,8 +34,6 @@ class VGG_homemade(nn.Module):
         x = self.avgpool(x)
         if self.classifier:
             x = self.classifier(x)
-            
-        print(x.shape)
         return x
 
 
