@@ -251,7 +251,7 @@ class standard_conv(nn.Module):
     """
     Based on https://github.com/MichiganCOG/TASED-Net/blob/master/model.py
     """
-    def __init__(self, in_size=None, out_size=None, k=None, s=1, p=1, d=1):
+    def __init__(self, in_size=None, out_size=None, k=None, s=1, p=0, d=1):
         super(standard_conv, self).__init__()
         self.conv = nn.Conv2d(in_channels=in_size, 
                               out_channels=out_size, 
