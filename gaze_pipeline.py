@@ -77,8 +77,17 @@ if __name__ == '__main__':
         print("loss in training: {}, loss in validation: {}".format(train_loss, valid_loss))
         train_losses.append(train_loss)
         valid_losses.append(valid_loss)
-
         
+        torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': gazenet.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'scheduler': scheduler.state_dict(),
+                    'loss': loss,
+                    }, "models/gazenet_mid_train"
+            )
+
+torch.save(predict_test, 'sample_heatmap_prediction_idx:{}.pt'.format(idx_t))
 print("done")
 #%%
 
