@@ -96,6 +96,7 @@ def decoder(layers = None,
     for layer in layers:
         if layer == layers[-1]:
             sequence.append(nn.Conv2d(input_size, 1, 1))
+            sequence.append(nn.ReLU(inplace=True))
         elif layer == 'U':
             sequence.append(upsample)
         elif layer == 'IA':
