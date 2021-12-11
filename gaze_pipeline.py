@@ -24,8 +24,8 @@ test_loader = torch.load('test_loader.pt')
 gazenet.to(device)
 
 loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device))
-optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9,weight_decay=0.0005)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
+optimizer = optim.SGD(gazenet.parameters(), lr=0.1, momentum=0.9,weight_decay=0.0005)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=2)
 train_losses=[]
 valid_losses=[]
 
@@ -33,7 +33,8 @@ valid_losses=[]
 epochs = 50
 if __name__ == '__main__':
     for epoch in range(0, epochs):
-        
+        print("learning rate: {}".format(scheduler.get_lr()))
+
         print("starting epoch: {}".format(epoch))
         
         train_loss=0.0
@@ -50,10 +51,10 @@ if __name__ == '__main__':
             
             loss=loss_fn(predict,y)
             loss.backward()
-            optimizer.step()
             
             train_loss+=loss.item()*X.size(0)
-            
+            scheduler.step(train_loss)
+
             torch.cuda.empty_cache()
 
         with torch.no_grad():
@@ -69,7 +70,6 @@ if __name__ == '__main__':
                 
                 loss = loss_fn(predict_test, y_test)
                 valid_loss+=loss.item()*X_test.size(0)
-                scheduler.step(valid_loss)
 
         
         train_loss=train_loss/len(train_loader.sampler) 
