@@ -154,13 +154,13 @@ class inception_blockA(nn.Module):
         b1 = self.branch1_1x1(x)
         
         b2 = self.branch2_1x1(x)
-        b2 = self.branch2_3_3(x)
+        b2 = self.branch2_3_3(b2)
         
         b3 = self.branch3_1x1(x)
-        b3 = self.branch3_3x3_2(x)
+        b3 = self.branch3_3x3_2(b3)
         
         b4 = self.branch4_3x3(x)
-        b4 = self.branch4_1x1(x)
+        b4 = self.branch4_1x1(b4)
         
         output = [b1, b2, b3, b4]
         
@@ -193,13 +193,13 @@ class inception_blockB(nn.Module):
         b1 = self.branch1_1x1(x)
         
         b2 = self.branch2_1x1(x)
-        b2 = self.branch2_3_3(x)
+        b2 = self.branch2_3_3(b2)
         
         b3 = self.branch3_1x1(x)
-        b3 = self.branch3_3x3_2(x)
+        b3 = self.branch3_3x3_2(b3)
         
         b4 = self.branch4_3x3(x)
-        b4 = self.branch4_1x1(x)
+        b4 = self.branch4_1x1(b4)
         
         output = [b1, b2, b3, b4]
         
