@@ -30,7 +30,7 @@ train_losses=[]
 valid_losses=[]
 
 
-epochs = 2
+epochs = 50
 if __name__ == '__main__':
     for epoch in range(0, epochs):
         
@@ -102,7 +102,7 @@ torch.save({
             'optimizer_state_dict': optimizer.state_dict(),
             'scheduler': scheduler.state_dict(),
             'loss': loss,
-            }, "models/gazenet_post_train"
+            }, "models/gazenet_post_train_{}_epochs".format(epochs)
     )
 
 
