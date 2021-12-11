@@ -142,12 +142,12 @@ class inception_blockA(nn.Module):
         self.branch1_1x1 = conv_block(512, 128, k=1, s=1)
         
         self.branch2_1x1 = conv_block(512, 128, k=1, s=1)
-        self.branch2_3_3 = conv_block(128, 256, k=3, s=1)
+        self.branch2_3_3 = conv_block(128, 256, k=3, s=1, p=1)
         
         self.branch3_1x1 = conv_block(512, 32, k=1, s=1)
-        self.branch3_3x3_2 = conv_block(32, 64, k=3, s= 1, d=2)
+        self.branch3_3x3_2 = conv_block(32, 64, k=3, s= 1, p=1,d=2)
         
-        self.branch4_3x3 = nn.MaxPool2d(kernel_size=3, stride=1)
+        self.branch4_3x3 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
         self.branch4_1x1 = conv_block(512, 64, k=1, s=1)
         
     def _forward(self, x):
@@ -172,7 +172,6 @@ class inception_blockA(nn.Module):
         print(b4.shape)
         
         output = [b1, b2, b3, b4]
-        print(output.shape)
         
         return output
       
@@ -210,12 +209,12 @@ class inception_blockB(nn.Module):
         self.branch1_1x1 = conv_block(256, 64, k=1, s=1)
         
         self.branch2_1x1 = conv_block(256, 64, k=1, s=1)
-        self.branch2_3_3 = conv_block(64, 128, k=3, s=1)
+        self.branch2_3_3 = conv_block(64, 128, k=3, s=1, p=1)
         
         self.branch3_1x1 = conv_block(256, 16, k=1, s=1)
-        self.branch3_3x3_2 = conv_block(16, 32, k=3, s= 1, d=2)
+        self.branch3_3x3_2 = conv_block(16, 32, k=3, s=1,p=1, d=2)
         
-        self.branch4_3x3 = nn.MaxPool2d(kernel_size=3, stride=1)
+        self.branch4_3x3 = nn.MaxPool2d(kernel_size=3, stride=1, p=1)
         self.branch4_1x1 = conv_block(256, 32, k=1, s=1)
         
     def _forward(self, x):
