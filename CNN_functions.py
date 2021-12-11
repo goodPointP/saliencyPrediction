@@ -151,20 +151,49 @@ class inception_blockA(nn.Module):
         self.branch4_1x1 = conv_block(512, 64, k=1, s=1)
         
     def _forward(self, x):
+        
+        print(x.shape)
         b1 = self.branch1_1x1(x)
+        print(b1.shape)
         
         b2 = self.branch2_1x1(x)
+        print(b2.shape)
         b2 = self.branch2_3_3(b2)
-        
+        print(b2.shape)
+
         b3 = self.branch3_1x1(x)
+        print(b3.shape)
         b3 = self.branch3_3x3_2(b3)
-        
+        print(b3.shape)
+
         b4 = self.branch4_3x3(x)
+        print(b4.shape)
         b4 = self.branch4_1x1(b4)
+        print(b4.shape)
         
         output = [b1, b2, b3, b4]
+        print(output.shape)
         
         return output
+      
+        
+      
+        
+        # b1 = self.branch1_1x1(x)
+        
+        
+        # b2 = self.branch2_1x1(x)
+        # b2 = self.branch2_3_3(b2)
+        
+        # b3 = self.branch3_1x1(x)
+        # b3 = self.branch3_3x3_2(b3)
+        
+        # b4 = self.branch4_3x3(x)
+        # b4 = self.branch4_1x1(b4)
+        
+        # output = [b1, b2, b3, b4]
+        
+        # return output
     
     def forward(self, x):
         x = self._forward(x)
