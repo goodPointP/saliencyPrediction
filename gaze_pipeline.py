@@ -25,7 +25,7 @@ gazenet.to(device)
 
 loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device))
 optimizer = optim.SGD(gazenet.parameters(), lr=0.1, momentum=0.9,weight_decay=0.0005)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=2)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
 train_losses=[]
 valid_losses=[]
 
@@ -52,9 +52,7 @@ if __name__ == '__main__':
             loss.backward()
             
             train_loss+=loss.item()*X.size(0)
-            
             optimizer.step()
-            scheduler.step(train_loss)
 
             torch.cuda.empty_cache()
 
@@ -71,6 +69,8 @@ if __name__ == '__main__':
                 
                 loss = loss_fn(predict_test, y_test)
                 valid_loss+=loss.item()*X_test.size(0)
+                scheduler.step(valid_loss)
+
 
         
         train_loss=train_loss/len(train_loader.sampler) 
