@@ -23,7 +23,8 @@ test_loader = torch.load('test_loader.pt')
 
 gazenet.to(device)
 
-loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device))
+# loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device))
+loss_fn = torch.nn.BCELoss()
 optimizer = optim.SGD(gazenet.parameters(), lr=0.1, momentum=0.9,weight_decay=0.0005)
 # scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
 train_losses=[]
@@ -41,35 +42,41 @@ if __name__ == '__main__':
         gazenet.train()
         
         for idx, (X, y) in enumerate(train_loader):
+            if idx < 100:
             
-            X = X.to(device)
-            y = y.to(device).float()
-            
-            optimizer.zero_grad()
-            predict = gazenet(X)  
-            
-            loss=loss_fn(predict,y)
-            loss.backward()
-            
-            train_loss+=loss.item()*X.size(0)
-            optimizer.step()
-
-            torch.cuda.empty_cache()
-
-        with torch.no_grad():
-            
-            gazenet.eval()
-            
+                X = X.to(device)
+                y = y.to(device).float()
+                
+                optimizer.zero_grad()
+                predict = gazenet(X)
+                
+                loss=loss_fn(predict,y)
+                loss.backward()
+                
+                train_loss+=loss.item()*X.size(0)
+                optimizer.step()
+    
+                torch.cuda.empty_cache()
+            else:
+                pass
+    
+            with torch.no_grad():
+                
+                gazenet.eval()
+                
             for idx_t, (X_test, y_test) in enumerate(test_loader):
+                if idx < 100:
                 
-                X_test = X_test.to(device)
-                y_test = y_test.to(device).float()
-
-                predict_test = gazenet(X_test)
-                
-                loss = loss_fn(predict_test, y_test)
-                valid_loss+=loss.item()*X_test.size(0)
-                # scheduler.step(valid_loss)
+                    X_test = X_test.to(device)
+                    y_test = y_test.to(device).float()
+    
+                    predict_test = gazenet(X_test)
+                    
+                    loss = loss_fn(predict_test, y_test)
+                    valid_loss+=loss.item()*X_test.size(0)
+                    # scheduler.step(valid_loss)
+                else:
+                    pass
 
 
         
