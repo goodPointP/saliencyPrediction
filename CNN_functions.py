@@ -214,7 +214,7 @@ class inception_blockB(nn.Module):
         self.branch3_1x1 = conv_block(256, 16, k=1, s=1)
         self.branch3_3x3_2 = conv_block(16, 32, k=3, s=1,p=1, d=2)
         
-        self.branch4_3x3 = nn.MaxPool2d(kernel_size=3, stride=1, p=1)
+        self.branch4_3x3 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
         self.branch4_1x1 = conv_block(256, 32, k=1, s=1)
         
     def _forward(self, x):
