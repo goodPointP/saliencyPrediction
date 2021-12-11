@@ -11,18 +11,8 @@ vgg_base = models.vgg16(pretrained=True)
 
 #%% Create encoder and decoder for custom model
 
-cfg_encode = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
-convolution_settings = [3, 1, 1]
-pool_settings = [2, 2, 0, 1, False]
-
-features = CNN_functions.encoder(cfg_encode, convolution_settings, pool_settings, 3)
-#%%
-
-
-cfg_decode = [512, 'U', 256, 'U', 128, 'U', 64, 'U', 3, 'U', 1]
-cfg_up = [2, "bicubic", False]
-
-classifier = CNN_functions.decoder(layers=cfg_decode, conv_params=convolution_settings, upsampler=cfg_up, input_size=512, relu=True)
+features = CNN_functions.encoder()
+classifier = CNN_functions.decoder()
     
 gazenet = CNN_functions.VGG_homemade(features, preset=False)
 
