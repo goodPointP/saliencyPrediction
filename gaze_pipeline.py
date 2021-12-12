@@ -25,7 +25,7 @@ gazenet.to(device)
 
 loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device), reduction='sum')
 # loss_fn = torch.nn.BCELoss()
-optimizer = optim.SGD(gazenet.parameters(), lr=0.1, momentum=0.9,weight_decay=0.0005)
+optimizer = optim.Adam(gazenet.parameters(), lr=0.01,weight_decay=0.0005)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3)
 train_losses=[]
 valid_losses=[]
