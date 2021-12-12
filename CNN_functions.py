@@ -21,6 +21,7 @@ class VGG_homemade(nn.Module):
     def __init__(self, features = None, classifier = None, preset = True):
         super().__init__()
         self.avgpool = nn.AdaptiveAvgPool2d(output_size=(7, 7))
+        
         if preset:
             self.features = encoder()
             self.classifier = decoder()
@@ -32,8 +33,7 @@ class VGG_homemade(nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = self.avgpool(x)
-        if self.classifier:
-            x = self.classifier(x)
+        x = self.classifier(x)
         return x
 
 
@@ -52,9 +52,11 @@ def encoder(layers = None,
     if not pool_params:
         pool_params = [2, 2, 0, 1, False]
     
+    relu = nn.LeakyReLU()
     sequence = []
     input_size = input_size
     k, s, p = (*conv_params,)
+    
     if not pool_params:
         MaxPool = nn.MaxPool2d(k, s, p)
     else:
@@ -66,7 +68,7 @@ def encoder(layers = None,
         else:
             if (relu == True) and (batch == True):
                 sequence.append(nn.Conv2d(input_size, layer, k, s, p))
-                sequence.append(nn.ReLU(inplace=True))
+                sequence.append(relu)
             else:
                 sequence.append(nn.Conv2d(input_size, layer, k, s, p))
             input_size = layer
@@ -101,7 +103,7 @@ def decoder(layers = None,
     if not upsampler:
         upsampler = [2, "bicubic", False]
     
-    
+    relu = nn.LeakyReLU()
     sequence = []
     input_size = input_size
     k, s, p = (*conv_params,)
@@ -111,7 +113,7 @@ def decoder(layers = None,
     for layer in layers:
         if layer == layers[-1]:
             sequence.append(nn.Conv2d(input_size, 1, 1))
-            sequence.append(nn.ReLU(inplace=True))
+            sequence.append(relu)
             sequence.append(nn.Upsample(scale_factor=8, mode=mode, align_corners=False))
         elif layer == 'U':
             sequence.append(upsample)
@@ -241,11 +243,11 @@ class standard_conv(nn.Module):
                               padding=p, 
                               bias=False,
                               )
-        self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
-        self.relu = nn.ReLU(inplace=True)
+        # self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
+        self.relu = nn.LeakyReLU()
     
     def forward(self, x):
         x = self.conv(x)
-        x = self.bn(x)
+        # x = self.bn(x)
         x = self.relu(x)
         return x
