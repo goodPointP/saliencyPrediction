@@ -66,11 +66,8 @@ def encoder(layers = None,
         if layer == 'M':
             sequence.append(MaxPool)
         else:
-            if (relu == True) and (batch == True):
-                sequence.append(nn.Conv2d(input_size, layer, k, s, p))
-                sequence.append(relu)
-            else:
-                sequence.append(nn.Conv2d(input_size, layer, k, s, p))
+            sequence.append(nn.Conv2d(input_size, layer, k, s, p))
+            sequence.append(relu)
             input_size = layer
     return nn.Sequential(*sequence)
 
