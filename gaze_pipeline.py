@@ -50,7 +50,7 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             predict = gazenet(X)
             
-            loss=loss_fn(predict.flatten(),y.flatten())
+            loss=loss_fn(predict,y.squeeze(1))
             loss.backward()
             
             train_loss+=loss.item()*X.size(0)
@@ -68,7 +68,7 @@ if __name__ == '__main__':
 
             predict_test = gazenet(X_test)
             
-            loss = loss_fn(predict_test.flatten(), y_test.flatten())
+            loss = loss_fn(predict_test, y_test.squeeze(1))
             valid_loss+=loss.item()*X_test.size(0)
             
         scheduler.step(valid_loss)
