@@ -47,12 +47,12 @@ if __name__ == '__main__':
         for idx, (X, y) in enumerate(train_loader):
             
             X = X.to(device)
-            y = y.to(device)
+            y = y.to(device).float()
             
             optimizer.zero_grad()
             predict = gazenet(X)
             
-            loss=loss_fn(predict,y.squeeze(1))
+            loss=loss_fn(predict,y)
             loss.backward()
             
             train_loss+=loss.item()*X.size(0)
@@ -66,11 +66,11 @@ if __name__ == '__main__':
         for idx_t, (X_test, y_test) in enumerate(test_loader):
                 
             X_test = X_test.to(device)
-            y_test = y_test.to(device)
+            y_test = y_test.to(device).float()
 
             predict_test = gazenet(X_test)
             
-            loss = loss_fn(predict_test, y_test.squeeze(1))
+            loss = loss_fn(predict_test, y_test)
             valid_loss+=loss.item()*X_test.size(0)
             
         scheduler.step(valid_loss)
