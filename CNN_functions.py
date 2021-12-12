@@ -80,11 +80,21 @@ def decoder(layers = None,
             ):
     
     if not layers:
-        layers = ['IA', 'U', 'IB', 'U', 128, 'U', 64, 'U', 3, 'U', 1]
+        layers = ['IA', 
+                #  'U', 
+                  'IB', 
+                #  'U', 
+                  128, 
+                #  'U', 
+                  64, 
+                #  'U',
+                  3, 
+                  #'U', 
+                  1]
     if not conv_params:
         conv_params = [3, 1, 1]
     if not upsampler:
-        upsampler = [2, "bicubic", False]
+        upsampler = [8, "bicubic", False]
     
     
     sequence = []
@@ -97,6 +107,7 @@ def decoder(layers = None,
         if layer == layers[-1]:
             sequence.append(nn.Conv2d(input_size, 1, 1))
             sequence.append(nn.ReLU(inplace=True))
+            sequence.append(upsample)
         elif layer == 'U':
             sequence.append(upsample)
         elif layer == 'IA':

@@ -21,8 +21,8 @@ base_state_dict = vgg_base.state_dict()
 gazenet.load_state_dict(base_state_dict, strict=False)
 
 #%% Disable parameter tuning for original weights
-for param in gazenet.parameters():
-    param.requires_grad = False
+# for param in gazenet.parameters():
+#     param.requires_grad = False
 #%% Add fully convolutional classifier
 
 gazenet.classifier = classifier
