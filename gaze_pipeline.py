@@ -45,7 +45,7 @@ if __name__ == '__main__':
         for idx, (X, y) in enumerate(train_loader):
             
             X = X.to(device)
-            y = y.to(device).float()
+            y = y.to(device)
             
             optimizer.zero_grad()
             predict = gazenet(X)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         for idx_t, (X_test, y_test) in enumerate(test_loader):
                 
             X_test = X_test.to(device)
-            y_test = y_test.to(device).float()
+            y_test = y_test.to(device)
 
             predict_test = gazenet(X_test)
             
