@@ -110,7 +110,7 @@ def decoder(layers = None,
     for layer in layers:
         if layer == layers[-1]:
             sequence.append(nn.Conv2d(input_size, 1, 1))
-            sequence.append(relu)
+            # sequence.append(relu)
             sequence.append(nn.Upsample(scale_factor=8, mode=mode, align_corners=False))
         elif layer == 'U':
             sequence.append(upsample)

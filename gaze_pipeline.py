@@ -25,13 +25,13 @@ gazenet.to(device)
 
 # loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device), reduction='sum')
 loss_fn = torch.nn.BCELoss()
-optimizer = optim.Adam(gazenet.parameters(), lr=0.01,weight_decay=0.0005)
+optimizer = optim.SGD(gazenet.parameters(), lr=0.01,weight_decay=0.0005)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3)
 train_losses=[]
 valid_losses=[]
 
 
-epochs = 3
+epochs = 10
 if __name__ == '__main__':
     for epoch in range(0, epochs):
         
@@ -49,7 +49,7 @@ if __name__ == '__main__':
             optimizer.zero_grad()
             predict = gazenet(X)
             
-            loss=loss_fn(predict.round(),y)
+            loss=loss_fn(predict,y)
             loss.backward()
             
             train_loss+=loss.item()*X.size(0)
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
             predict_test = gazenet(X_test)
             
-            loss = loss_fn(predict_test.round(), y_test)
+            loss = loss_fn(predict_test, y_test)
             valid_loss+=loss.item()*X_test.size(0)
             
         scheduler.step(valid_loss)
