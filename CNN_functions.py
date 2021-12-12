@@ -80,21 +80,26 @@ def decoder(layers = None,
             ):
     
     if not layers:
-        layers = ['IA', 
-                #  'U', 
-                  'IB', 
-                #  'U', 
-                  128, 
-                #  'U', 
-                  64, 
-                #  'U',
-                  3, 
-                  #'U', 
+        layers = ['IA',
+                  'IA', 
+                  'U', 
+                  256,
+                  256,
+                  256,
+                  'U', 
+                  128,
+                  128,
                   1]
+                  # 64,
+   
+                #  'U',
+                  # 3, 
+                  #'U', 
+                  # 1]
     if not conv_params:
         conv_params = [3, 1, 1]
     if not upsampler:
-        upsampler = [8, "bicubic", False]
+        upsampler = [2, "bicubic", False]
     
     
     sequence = []
@@ -107,7 +112,7 @@ def decoder(layers = None,
         if layer == layers[-1]:
             sequence.append(nn.Conv2d(input_size, 1, 1))
             sequence.append(nn.ReLU(inplace=True))
-            sequence.append(upsample)
+            sequence.append(nn.Upsample(scale_factor=8, mode=mode, align=False))
         elif layer == 'U':
             sequence.append(upsample)
         elif layer == 'IA':
@@ -178,25 +183,6 @@ class inception_blockA(nn.Module):
         output = [b1, b2, b3, b4]
         
         return output
-      
-        
-      
-        
-        # b1 = self.branch1_1x1(x)
-        
-        
-        # b2 = self.branch2_1x1(x)
-        # b2 = self.branch2_3_3(b2)
-        
-        # b3 = self.branch3_1x1(x)
-        # b3 = self.branch3_3x3_2(b3)
-        
-        # b4 = self.branch4_3x3(x)
-        # b4 = self.branch4_1x1(b4)
-        
-        # output = [b1, b2, b3, b4]
-        
-        # return output
     
     def forward(self, x):
         x = self._forward(x)
