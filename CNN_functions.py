@@ -109,7 +109,7 @@ def decoder(layers = None,
         
     for layer in layers:
         if layer == layers[-1]:
-            sequence.append(standard_conv(input_size, 1, 1))
+            sequence.append(standard_conv(input_size, 1, 1, relu=False))
             sequence.append(nn.Upsample(scale_factor=8, mode=mode, align_corners=False))
         elif layer == 'U':
             sequence.append(upsample)
@@ -208,20 +208,22 @@ class standard_conv(nn.Module):
     """
     Based on https://github.com/MichiganCOG/TASED-Net/blob/master/model.py
     """
-    def __init__(self, in_size=None, out_size=None, k=None, s=1, p=0, d=1):
+    def __init__(self, in_size=None, out_size=None, k=None, s=1, p=0, d=1, relu=True):
         super(standard_conv, self).__init__()
         self.conv = nn.Conv2d(in_channels=in_size, 
                               out_channels=out_size, 
                               kernel_size=k, 
                               stride=s, 
                               padding=p, 
-                              bias=False,
-                              )
+                              bias=True)
+        torch.nn.init.normal_(self.conv.weight.data)
         # self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
-        self.relu = nn.LeakyReLU()
+        if relu:
+            self.relu = nn.LeakyReLU()
     
     def forward(self, x):
         x = self.conv(x)
         # x = self.bn(x)
-        x = self.relu(x)
+        if self.relu:
+            x = self.relu(x)
         return x
