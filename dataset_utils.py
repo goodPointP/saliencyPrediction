@@ -20,7 +20,7 @@ def baseline_dset():
 
 def loader_pipe(impaths, targets, parts=5, batch_size = 32, workers = 10):
     
-    split = int(len(impaths)/(parts*(parts-1)))
+    split = int(len(impaths)/parts*(parts-1))
     
 
     transformer = transforms.Compose([transforms.Resize(256), 
