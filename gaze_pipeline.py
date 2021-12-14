@@ -28,7 +28,7 @@ gazenet.to(device)
 loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([9.1],device=device), reduction='mean')
 # loss_fn = torch.nn.BCELoss()
 # loss_fn = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.2, 3.4], device=device), reduction='sum')
-optimizer = optim.SGD(gazenet.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0005)
+optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3)
 train_losses=[]
 valid_losses=[]
@@ -86,7 +86,7 @@ if __name__ == '__main__':
                     'epoch': epoch,
                     'model_state_dict': gazenet.state_dict(),
                     'optimizer_state_dict': optimizer.state_dict(),
-                    # 'scheduler': scheduler.state_dict(),
+                    'scheduler': scheduler.state_dict(),
                     'loss': loss,
                     }, "models/gazenet_mid_train"
             )
@@ -104,7 +104,7 @@ torch.save({
             'epoch': epoch,
             'model_state_dict': gazenet.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
-            # 'scheduler': scheduler.state_dict(),
+            'scheduler': scheduler.state_dict(),
             'loss': loss,
             }, "models/gazenet_post_train_{}_epochs".format(epochs)
     )
