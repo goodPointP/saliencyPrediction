@@ -34,7 +34,7 @@ train_losses=[]
 valid_losses=[]
 
 #%%
-epochs = 50
+epochs = 100
 if __name__ == '__main__':
     for epoch in range(0, epochs):
         
