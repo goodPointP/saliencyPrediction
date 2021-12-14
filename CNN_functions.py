@@ -220,6 +220,8 @@ class standard_conv(nn.Module):
         # self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
         if relu:
             self.relu = nn.LeakyReLU()
+        else:
+            self.relu = False
     
     def forward(self, x):
         x = self.conv(x)
