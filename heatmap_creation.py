@@ -96,8 +96,6 @@ class heatmapper:
         if count == None:
             fixationlist = self.fixations
         
-        checkpoints = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000]
-        # heatmaps = torch.empty((len(fixationlist), 1, self.dims[1], self.dims[0]))
         heatmaps = []
         gsdwh = gwh/stddev
         gaus = self._gaussian_(gwh, gsdwh)
@@ -107,11 +105,6 @@ class heatmapper:
         for idx, fix in enumerate(fixationlist):
             if idx % 1000 == 0:
                 print("computed {} heatmaps".format(idx))
-            
-            if idx in checkpoints:
-                np.savez('heatmaps_up_to:{}.npz'.format(idx), heatmaps=heatmaps)
-                print("saving at checkpoint: {}".format(idx))
-                heatmaps = []
                 
             heatmap = torch.empty(heatmapsize, dtype=float, device=self.device)
             for i in range(0,len(fix)):
