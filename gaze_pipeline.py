@@ -25,15 +25,15 @@ test_loader = torch.load('test_loader.pt')
 
 gazenet.to(device)
 
-loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414],device=device), reduction='mean')
+loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([9.1],device=device), reduction='mean')
 # loss_fn = torch.nn.BCELoss()
 # loss_fn = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.2, 3.4], device=device), reduction='sum')
-optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
+optimizer = optim.SGD(gazenet.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0005)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3)
 train_losses=[]
 valid_losses=[]
 
-#%%
+
 epochs = 100
 if __name__ == '__main__':
     for epoch in range(0, epochs):
