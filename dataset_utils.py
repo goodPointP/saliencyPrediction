@@ -34,7 +34,7 @@ def loader_pipe(impaths, targets, parts=5, batch_size = 32, workers = 10):
                           transform=transformer)
     
     dataset_test = gazedataset(impaths[split:],
-                          targets[:split],
+                          targets[split:],
                           transform=transformer)
     
     train_loaded = torch.utils.data.DataLoader(dataset_train,
