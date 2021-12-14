@@ -16,7 +16,7 @@ targets = mappy.compute()
 
 #%% 
 
-train_loader, test_loader = dataset_utils.loader_pipe(impaths, targets)
+train_loader, test_loader = dataset_utils.loader_pipe(impaths, targets, batch_size=16)
 
 #%%
 
