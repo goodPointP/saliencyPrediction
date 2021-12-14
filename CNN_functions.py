@@ -175,7 +175,7 @@ class standard_conv(nn.Module):
                               padding=p, 
                               bias=True)
         torch.nn.init.xavier_normal_(self.conv.weight)
-        torch.nn.init.constant(self.conv.bias, 0)
+        torch.nn.init.constant_(self.conv.bias, 0)
         # self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
         if relu:
             self.relu = nn.LeakyReLU()
