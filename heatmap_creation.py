@@ -65,7 +65,7 @@ class heatmapper:
                     path = '../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext)
                     if cat in self.abstract:
                         self.discards += 1
-                        pass
+                        continue
                     
                     if os.path.exists(path):
                         paths.append(path)
@@ -74,7 +74,7 @@ class heatmapper:
                                                                np.abs(df_temp.start-df_temp.end).values/100)))).to(self.device).T)
                     else:
                         self.discards += 1
-                        pass
+                        continue
                 except IndexError:
                     self.discards += 1
                     if debug == True:

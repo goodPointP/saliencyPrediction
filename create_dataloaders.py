@@ -9,13 +9,11 @@ import dataset_utils
 #%%
 
 df_baseline, dims = dataset_utils.baseline_dset()
-#%%
 mappy = heatmapper(df_baseline, dims)
-
-#%%
 
 impaths = mappy.paths
 targets = mappy.compute()
+
 #%% 
 
 train_loader, test_loader = dataset_utils.loader_pipe(impaths, targets)
