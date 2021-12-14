@@ -4,7 +4,7 @@ import numpy as np
 import time
 import torch
 import os
-
+import dataset_utils
 
 class heatmapper:
     def __init__(self, dataframe, screen_dimensions, parse=True):
@@ -86,7 +86,7 @@ class heatmapper:
         else:
             return fixinfo, paths
 
-    def compute(self, count = None, gwh = 40, stddev = 6):
+    def compute(self, count = None, gwh = 20, stddev = 6):
         if type(count) == int:
             fixationlist = self.fixations[:count]
         
@@ -106,11 +106,13 @@ class heatmapper:
             if idx % 1000 == 0:
                 print("computed {} heatmaps".format(idx))
                 
-            heatmap = torch.empty(heatmapsize, dtype=float, device=self.device)
+            heatmap = torch.zeros(heatmapsize, dtype=float, device=self.device)
             for i in range(0,len(fix)):
+                
 
                 x = int(strt + int(fix[:,0][i]) - int(gwh/2))
                 y = int(strt + int(fix[:,1][i]) - int(gwh/2))
+
 
                 if (not 0 < x < self.dims[0]) or (not 0 < y < self.dims[1]):
                     hadj=[0,gwh];vadj=[0,gwh]
@@ -131,11 +133,16 @@ class heatmapper:
                 else:                
                     heatmap[y:y+gwh,x:x+gwh] += gaus * fix[:,2][i]
                     
+                    
             ### ADD 0-255 (or 0-1?) SCALING FOR EACH HEATMAP... or for entire set of heatmaps??
             # heatmaps[idx] = (heatmap.cpu()[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt] > .05).astype(int)
-            heatmaps.append((heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt].cpu().numpy() > .05).astype(int))
+            heatmaps.append((heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt].cpu().numpy() > 0.01).astype(int))
             del heatmap
             torch.cuda.empty_cache()
             
         np.savez('heatmaps_up_to:{}.npz'.format(idx), heatmaps=heatmaps)
         return heatmaps
+
+
+
+
