@@ -100,7 +100,7 @@ def decoder(layers = None,
     if not upsampler:
         upsampler = [2, "bicubic", False]
     
-    relu = nn.LeakyReLU()
+    # relu = nn.LeakyReLU()
     sequence = []
     input_size = input_size
     k, s, p = (*conv_params,)
@@ -109,8 +109,7 @@ def decoder(layers = None,
         
     for layer in layers:
         if layer == layers[-1]:
-            sequence.append(nn.Conv2d(input_size, 1, 1))
-            # sequence.append(relu)
+            sequence.append(standard_conv(input_size, 1, 1))
             sequence.append(nn.Upsample(scale_factor=8, mode=mode, align_corners=False))
         elif layer == 'U':
             sequence.append(upsample)
