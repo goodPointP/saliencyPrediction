@@ -28,7 +28,7 @@ gazenet.to(device)
 loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([9.1],device=device), reduction='mean')
 # loss_fn = torch.nn.BCELoss()
 # loss_fn = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.2, 3.4], device=device), reduction='sum')
-optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
+optimizer = optim.SGD(gazenet.parameters(), lr=0.001, momentum=0.9, weight_decay=0.0005)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=3)
 train_losses=[]
 valid_losses=[]
@@ -45,21 +45,24 @@ if __name__ == '__main__':
         gazenet.train()
         
         for idx, (X, y) in enumerate(train_loader):
-            
-            X = X.to(device)
-            y = y.to(device).float()
-            
-            optimizer.zero_grad()
-            predict = gazenet(X)
-            
-            loss=loss_fn(predict,y)
-            loss.backward()
-            
-            train_loss+=loss.item()*X.size(0)
-            optimizer.step()
+            with torch.autograd.detect_anomaly():
 
-            torch.cuda.empty_cache()
-            
+                X = X.to(device)
+                y = y.to(device).float()
+                
+                optimizer.zero_grad()
+                predict = gazenet(X)
+                
+                print(torch.isnan(predict).any())
+                
+                loss=loss_fn(predict,y)
+                loss.backward()
+                
+                train_loss+=loss.item()*X.size(0)
+                optimizer.step()
+    
+                torch.cuda.empty_cache()
+                
         with torch.no_grad():
             gazenet.eval()
             

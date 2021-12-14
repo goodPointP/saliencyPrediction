@@ -116,9 +116,6 @@ def decoder(layers = None,
         elif layer == 'IA':
             sequence.append(inception_blockA())
             input_size = 512
-        elif layer == 'IB':
-            sequence.append(inception_blockB())
-            input_size = 256
         else:
             sequence.append(standard_conv(input_size, layer, k, s, p))
             input_size = layer
@@ -164,45 +161,6 @@ class inception_blockA(nn.Module):
         x = self._forward(x)
         return torch.cat(x, 1)
     
-    
-class inception_blockB(nn.Module):
-    """
-    architecture borrowed from "https://github.com/pytorch/vision/blob/6a1d9ee7843e9edbf2c8a64b1517719a70b51f39/torchvision/models/inception.py#L398"
-    """
-    def __init__(self):
-        super().__init__()
-        conv_block = standard_conv
-        self.branch1_1x1 = conv_block(512, 64, k=1, s=1)
-        
-        self.branch2_1x1 = conv_block(512, 64, k=1, s=1)
-        self.branch2_3_3 = conv_block(64, 128, k=3, s=1, p=1)
-        
-        self.branch3_1x1 = conv_block(512, 16, k=1, s=1)
-        self.branch3_3x3_2 = conv_block(16, 32, k=3, s=1,p=1, d=2)
-        
-        self.branch4_3x3 = nn.MaxPool2d(kernel_size=3, stride=1, padding=1)
-        self.branch4_1x1 = conv_block(512, 32, k=1, s=1)
-        
-    def _forward(self, x):
-        b1 = self.branch1_1x1(x)
-        
-        b2 = self.branch2_1x1(x)
-        b2 = self.branch2_3_3(b2)
-
-        b3 = self.branch3_1x1(x)
-        b3 = self.branch3_3x3_2(b3)
-
-        b4 = self.branch4_3x3(x)
-        b4 = self.branch4_1x1(b4)
-        
-        output = [b1, b2, b3, b4]
-        
-        return output
-    
-    def forward(self, x):
-        x = self._forward(x)
-        return torch.cat(x, 1)
-
 
 class standard_conv(nn.Module): 
     """
@@ -216,7 +174,7 @@ class standard_conv(nn.Module):
                               stride=s, 
                               padding=p, 
                               bias=True)
-        torch.nn.init.xavier_normal_(self.conv.weight.data, 2)
+        torch.nn.init.xavier_normal_(self.conv.weight)
         # self.bn = nn.BatchNorm2d(out_size, eps=1e-3, momentum=0.001, affine=False) 
         if relu:
             self.relu = nn.LeakyReLU()
