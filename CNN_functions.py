@@ -125,28 +125,6 @@ def decoder(layers = None,
     return nn.Sequential(*sequence)
 
 
-class gazedataset(torch.utils.data.Dataset):
-    def __init__(self, root, labels, transform=None, target_transform=None):
-        self.labels = labels
-        self.root = root
-        self.transform = transform
-        self.target_transform = target_transform
-
-    def __len__(self):
-        return(len(self.labels))
-    
-    def __getitem__(self, idx):
-        label = self.labels[idx]
-        imgpath = self.root[idx]
-        image = Image.open(imgpath)
-
-        if self.transform:
-            image = self.transform(image)
-        if self.target_transform:
-            label = self.target_transform(label).type(image.type())
-        return image, label
-
-
 class inception_blockA(nn.Module):
     """
     architecture borrowed from "https://github.com/pytorch/vision/blob/6a1d9ee7843e9edbf2c8a64b1517719a70b51f39/torchvision/models/inception.py#L398"

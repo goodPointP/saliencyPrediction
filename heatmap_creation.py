@@ -18,6 +18,7 @@ class heatmapper:
 
         """
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.abstract = [10, 11]
         self.discards = 0
         self.df = dataframe
         self.subjects = dataframe.SUBJECTINDEX.unique()
@@ -62,6 +63,10 @@ class heatmapper:
                     cat, filenr = int(df_temp.category.iloc[0]), int(df_temp.filenumber.iloc[0])
                     _, ext = os.path.splitext(os.listdir('../../Datasets/nature_dataset/{}/'.format(cat))[-1])
                     path = '../../Datasets/nature_dataset/{}/{}{}'.format(cat, filenr, ext)
+                    if cat in self.abstract:
+                        self.discards += 1
+                        pass
+                    
                     if os.path.exists(path):
                         paths.append(path)
                         fixinfo.append(torch.Tensor((np.array((df_temp.x.values*self.scale[0], 
@@ -138,4 +143,6 @@ class heatmapper:
             heatmaps.append((heatmap[np.newaxis, strt:self.dims[1]+strt,strt:self.dims[0]+strt].cpu().numpy() > .05).astype(int))
             del heatmap
             torch.cuda.empty_cache()
+            
+        np.savez('heatmaps_up_to:{}.npz'.format(idx), heatmaps=heatmaps)
         return heatmaps
