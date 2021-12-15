@@ -16,7 +16,6 @@ parser.add_argument('-i_data', default=None,  dest='input')
 parser.add_argument('-o', default=None, required=True, dest='outfile')
 parser.add_argument('-s', default=False, required=False, dest='save')
 parser.add_argument('-so', default=None, required='-s' in sys.argv, dest='dataset_outfile')
-# parser.add_argument('-t', default=None, dest='ground_truth', type=bool)
 
 args = parser.parse_args()
 
@@ -31,14 +30,15 @@ print("loading model")
 gazenet = torch.load(args.model)
 gazenet.to(device)
 gazenet.eval()
-print(args.input[0], args.input[1])
-print("constructing dataset")
+
 if len(args.input) > 1:
+    print("constructing dataset")
     args.input = tuple(args.input)
     dataset = inference_pipe(args.input, batch_size = 1, workers = 10)
     if args.save:
         torch.save(dataset, args.dataset_outfile)
 else:
+    print("using pre-constructed dataloader")
     dataset = args.input
 
 print("computing predictions")
