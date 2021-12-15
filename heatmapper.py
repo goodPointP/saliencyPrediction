@@ -83,7 +83,7 @@ class heatmapper:
         else:
             return fixinfo, paths
 
-    def compute(self, count = None, gwh = 20, stddev = 6):
+    def compute(self, count = None, gwh = 20, stddev = 6, save = True):
         if type(count) == int:
             fixationlist = self.fixations[:count]
         
@@ -137,7 +137,8 @@ class heatmapper:
             del heatmap
             torch.cuda.empty_cache()
             
-        np.savez('heatmaps_up_to:{}.npz'.format(idx), heatmaps=heatmaps)
+        if save:
+            np.savez('heatmaps_up_to:{}.npz'.format(idx), heatmaps=heatmaps)
         return heatmaps
 
 

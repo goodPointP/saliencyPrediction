@@ -3,6 +3,8 @@ from PIL import Image
 from torchvision import transforms
 import h5py
 import pandas as pd
+import utils_data
+from heatmapper import heatmapper
 #%%
 
 def baseline_dset():
@@ -49,6 +51,38 @@ def loader_pipe(impaths, targets, parts=5, batch_size = 32, workers = 10):
     
     return train_loaded, test_loaded
 
+def inference_pipe(input_tuple, batch_size = 16, workers = 10):
+    
+    start = input_tuple[0]
+    end = input_tuple[1]
+    
+    df_baseline, dims = utils_data.baseline_dset()
+    
+    mappy = heatmapper(df_baseline, dims)
+    
+    impaths = mappy.paths[start:end]
+    targets = mappy.compute((start, end))
+    
+    
+
+    transformer = transforms.Compose([transforms.Resize(256), 
+                                transforms.CenterCrop(224), 
+                                transforms.ToTensor(), 
+                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                                ])
+    
+    dataset = gazedataset(impaths,
+                          targets,
+                          transform=transformer)
+    
+    
+    dataset_loaded = torch.utils.data.DataLoader(dataset,
+                                                 batch_size = batch_size,
+                                                 shuffle = False,
+                                                 num_workers=workers)
+    
+
+    return dataset_loaded
 
 class gazedataset(torch.utils.data.Dataset):
     def __init__(self, root, labels, transform=None, target_transform=None):

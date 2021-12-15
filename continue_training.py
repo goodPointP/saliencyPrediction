@@ -1,3 +1,10 @@
+"""
+To run : <env> <python file> < -m model_dict_path> < -o output_path> < -tr traindata_path> < -ts testdata_path> < -e epochs>
+    
+e.g. : python3 continue_training.py -m models/gazenet_post_train_100_epochs -o models/newnet -tr train_loader.pt -ts test_loader.pt -e 3
+
+"""
+
 import torch
 import utils_nn
 import torch.optim as optim

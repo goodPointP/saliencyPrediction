@@ -8,6 +8,7 @@ df_baseline, dims = utils_data.baseline_dset()
 mappy = heatmapper(df_baseline, dims)
 
 impaths = mappy.paths
+#%%
 targets = mappy.compute()
 
 #%% 
