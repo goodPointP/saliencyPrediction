@@ -18,11 +18,11 @@ parser.add_argument('-s', default=False, required=False, dest='save')
 parser.add_argument('-so', default=None, required='-s' in sys.argv, dest='dataset_outfile')
 # parser.add_argument('-t', default=None, dest='ground_truth', type=bool)
 
-args = parser.parse_args(['-m', "models/newnet_model", "-o", "models/inferencetest"])
+args = parser.parse_args()
 
 if not args.input:
     sys.exit("input not found. Use '-i tuple' or '-i data' with two ints or a dataloader, respectively")
-    
+
 accuracy = 0
 heatmaps = []
 
