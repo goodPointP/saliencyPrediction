@@ -8,13 +8,13 @@ import sys
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 parser = argparse.ArgumentParser(description='model inference')
 parser.add_argument('-m', default=None, required=True, dest='model')
-parser.add_argument('-o', default=None, required=True, dest='outfile')
 parser.add_argument('-i', default=None, required=True, dest='input', nargs="+")
+parser.add_argument('-o', default=None, required=True, dest='outfile')
 parser.add_argument('-s', default=False, required=False, dest='save')
 parser.add_argument('-so', default=None, required='-s' in sys.argv, dest='dataset_outfile')
 # parser.add_argument('-t', default=None, dest='ground_truth', type=bool)
 
-args = parser.parse_args([])
+args = parser.parse_args()
 
 accuracy = 0
 heatmaps = []
