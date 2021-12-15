@@ -18,6 +18,7 @@ args = parser.parse_args()
 if args.model is not None:
     
     gazenet = utils_nn.VGG_homemade()
+    gazenet.to(device)
     loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([9.1],device=device), reduction='mean')
     optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=10)
@@ -38,7 +39,7 @@ valid_losses=[]
 
 if (args.outfile is not None) and (args.traindata is not None) and (args.testdata is not None) and (args.epochs is not None):
     #train loop here
-    gazenet.to(device)
+    # gazenet.to(device)
     train_loader = torch.load(args.traindata)
     test_loader = torch.load(args.testdata)
     epochs = args.epochs
