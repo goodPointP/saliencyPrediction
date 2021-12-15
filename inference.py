@@ -31,7 +31,7 @@ print("loading model")
 gazenet = torch.load(args.model)
 gazenet.to(device)
 gazenet.eval()
-
+print(args.input[0], args.input[1])
 print("constructing dataset")
 if len(args.input) > 1:
     args.input = tuple(args.input)
