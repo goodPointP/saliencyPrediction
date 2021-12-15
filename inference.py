@@ -1,6 +1,9 @@
+"""
+e.g. : 
+    python3 inference.py -m models/newnet_model -o models/inferencetest -i 0 10
+"""
+
 import torch
-import utils_nn
-import torch.optim as optim
 import argparse
 from utils_data import inference_pipe
 import sys
@@ -14,7 +17,9 @@ parser.add_argument('-s', default=False, required=False, dest='save')
 parser.add_argument('-so', default=None, required='-s' in sys.argv, dest='dataset_outfile')
 # parser.add_argument('-t', default=None, dest='ground_truth', type=bool)
 
-args = parser.parse_args()
+args = parser.parse_args(['-m', "models/newnet_model", "-o", "models/inferencetest" ,"-i", "0 10"])
+print(type(args.input))
+#%%
 
 accuracy = 0
 heatmaps = []
