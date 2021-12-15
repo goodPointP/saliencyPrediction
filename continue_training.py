@@ -13,7 +13,7 @@ parser.add_argument('-e', default=None, dest='epochs', type=int)
 
 args = parser.parse_args()
 
-
+#%%
 
 if args.model is not None:
     
@@ -34,8 +34,11 @@ else:
 train_losses=[]
 valid_losses=[]
 
+
+
 if (args.outfile is not None) and (args.traindata is not None) and (args.testdata is not None) and (args.epochs is not None):
     #train loop here
+    gazenet.to(device)
     train_loader = torch.load(args.traindata)
     test_loader = torch.load(args.testdata)
     epochs = args.epochs
@@ -98,8 +101,11 @@ if (args.outfile is not None) and (args.traindata is not None) and (args.testdat
         )
 
     torch.save(gazenet, args.outfile+"_model")
+    
 else:
-    print("missing input")
+    for key, value in vars(args).items():
+        if value is None:
+            print(key, "not supplied")
     
     
     
