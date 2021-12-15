@@ -194,7 +194,7 @@ def load_checkpoint(model, optimizer, scheduler, filename, loss = 0):
     if os.path.isfile(filename):
         print("=> loading checkpoint '{}'".format(filename))
         checkpoint = torch.load(filename)
-        start_epoch = checkpoint['epoch']
+        start_epoch = int(checkpoint['epoch'])
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         scheduler.load_state_dict(checkpoint['scheduler'])
