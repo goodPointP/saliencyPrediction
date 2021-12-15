@@ -1,21 +1,19 @@
 import torch
 import torch.optim as optim
-import CNN_functions
+import utils_nn
 
 #%%
 
 
-checkpoint = torch.load('models/gazenet')
-gazenet = CNN_functions.VGG_homemade()
+checkpoint = torch.load('models/gazenet_dict')
+gazenet = utils_nn.VGG_homemade()
 gazenet.load_state_dict(checkpoint['model_state_dict'])
 # for param in gazenet.features.parameters():
 #     param.requires_grad = False
 
 
-
-#%% #Collection of datasets
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-#%%
+
 
 train_loader = torch.load('train_loader.pt')
 test_loader = torch.load('test_loader.pt')
@@ -26,8 +24,6 @@ test_loader = torch.load('test_loader.pt')
 gazenet.to(device)
 
 loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([9.1],device=device), reduction='mean')
-# loss_fn = torch.nn.BCELoss()
-# loss_fn = torch.nn.CrossEntropyLoss(weight=torch.tensor([0.2, 3.4], device=device), reduction='sum')
 optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
 scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=10)
 train_losses=[]
@@ -88,7 +84,7 @@ if __name__ == '__main__':
                     'optimizer_state_dict': optimizer.state_dict(),
                     'scheduler': scheduler.state_dict(),
                     'loss': loss,
-                    }, "models/gazenet_mid_train"
+                    }, "models/gazenet_mid_train_dict"
             )
 
 torch.save(predict_test, 'sample_heatmap_prediction_idx:{}.pt'.format(idx_t))
@@ -106,7 +102,7 @@ torch.save({
             'optimizer_state_dict': optimizer.state_dict(),
             'scheduler': scheduler.state_dict(),
             'loss': loss,
-            }, "models/gazenet_post_train_{}_epochs".format(epochs)
+            }, "models/gazenet_post_train_{}_epochs_dict".format(epochs)
     )
 
 

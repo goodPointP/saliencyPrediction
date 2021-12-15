@@ -1,20 +1,17 @@
-from torchvision import models, transforms
+from torchvision import models
 import torch
-import PIL
-import torch.nn as nn
-import torch.functional as F
-import CNN_functions
+import utils_nn
 import torch.optim as optim
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 #%% Instantiate original VGG model WITH weights
 vgg_base = models.vgg16(pretrained=True)
 
-#%% Create encoder and decoder for custom model
 
-features = CNN_functions.encoder()
-classifier = CNN_functions.decoder()
+features = utils_nn.encoder()
+classifier = utils_nn.decoder()
     
-gazenet = CNN_functions.VGG_homemade(features, preset=False)
+gazenet = utils_nn.VGG_homemade(features, preset=False)
 
 #%% Initializing weights BEFORE adding new classifier
 base_state_dict = vgg_base.state_dict()
@@ -30,9 +27,9 @@ gazenet.classifier = classifier
 #%%
 
 
-loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([3.414]))
-optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9,weight_decay=0.0005)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', factor=0.1, patience=3)
+loss_fn = torch.nn.BCEWithLogitsLoss(pos_weight=torch.tensor([9.1],device=device), reduction='mean')
+optimizer = optim.SGD(gazenet.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0005)
+scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min', patience=10)
 epoch = 0
 loss = 0
 torch.save({
@@ -41,4 +38,4 @@ torch.save({
             'optimizer_state_dict': optimizer.state_dict(),
             'loss': loss,
             'scheduler': scheduler.state_dict(),
-            }, 'models/gazenet')
+            }, 'models/gazenet_dict')
