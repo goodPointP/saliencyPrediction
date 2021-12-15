@@ -9,7 +9,7 @@ parser.add_argument('-m', default=None, dest='model')
 parser.add_argument('-o', default=None, dest='outfile')
 parser.add_argument('-tr', default=None, dest='traindata')
 parser.add_argument('-ts', default=None, dest='testdata')
-parser.add_argument('-e', default=None, dest='epochs')
+parser.add_argument('-e', default=None, dest='epochs', type=int)
 
 args = parser.parse_args()
 
