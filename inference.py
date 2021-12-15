@@ -1,4 +1,13 @@
-"""
+""" 
+    REQUIRED:
+<env> 
+< inference.py> 
+< -m path/to_model> 
+< -o path/to_outfile>
+< i_tuple start_int end_int> OR < i_data path/to_dataloader>
+    OPTIONALS: 
+< -s boolean> : save dataloader created - requires "i_tuple"
+< -so path/to_dataloader_outfile>
 e.g. : 
     python3 inference.py -m models/newnet_model -o models/inferencetest -i 0 10
 """
