@@ -1,6 +1,6 @@
 
 import torch
-from heatmap_creation import heatmapper
+from heatmapper import heatmapper
 import utils_data
 #%%
 
