@@ -1,10 +1,7 @@
-import h5py
 import pandas as pd
 import numpy as np
-import time
 import torch
 import os
-import dataset_utils
 
 class heatmapper:
     def __init__(self, dataframe, screen_dimensions, parse=True):

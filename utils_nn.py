@@ -1,7 +1,6 @@
 import torch.nn as nn
 import os
 import torch 
-from PIL import Image
 
 class VGG_homemade(nn.Module):
     """ VGG implementation to be in control of params, but otherwise completely based on the original architecture

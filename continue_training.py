@@ -1,5 +1,4 @@
 import torch
-import os
 import utils_nn
 import torch.optim as optim
 import argparse

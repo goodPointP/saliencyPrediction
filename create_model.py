@@ -2,6 +2,7 @@ from torchvision import models
 import torch
 import utils_nn
 import torch.optim as optim
+
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 #%% Instantiate original VGG model WITH weights
