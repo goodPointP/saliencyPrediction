@@ -2,8 +2,6 @@ import sys
 sys.path.insert(1, '/imageSegmentation')
 
 # package imports
-import numpy
-from PIL import Image, ImageDraw, ImageFilter
 
 # saliency prediction imports
 
