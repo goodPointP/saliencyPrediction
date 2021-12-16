@@ -1,0 +1,12 @@
+2people1.jpg
+2people2.jpg
+car.jpg
+cat.jpg
+catPerson.jpg
+dog.jpg
+dog2.jpg
+leoImageList.txt
+milanBandic.jpg
+videogameScreenshot1.jpg
+videogameScreenshot2.jpg
+woman.jpeg
