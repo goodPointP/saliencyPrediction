@@ -4,6 +4,25 @@
 import pixellib 
 import numpy as np
 from pixellib.instance import instance_segmentation
+from PIL import Image, ImageDraw, ImageFilter
+
+# SEGMENT THE IMAGE
+def segmentTheImage(imageName):
+    segment_image = instance_segmentation()
+    segment_image.load_model("../../mask_rcnn_coco.h5")
+    segvalues, output = segment_image.segmentImage(imageName, output_image_name= imageName+"-segmented.jpg", mask_points_values = True)
+    masks = segvalues['masks'][0] # gets the detected objects' masks. length of onlyMasks is the number of detected objects
+    return (masks, segvalues, output)
+
+def createPixelArrayFromHeatmap(heatmap):
+    ## TO DO
+    #
+    #
+    #
+    #
+    #
+    pixelArray = []
+    return pixelArray
 
 # CHECK IF PREDICTED GAZE POINT IS CONTAINED IN A DETECTED IMAGE SEGMENT
 def checkExistanceOfPixelInMask(pixel, mask):
@@ -15,16 +34,6 @@ def checkExistanceOfPixelInMask(pixel, mask):
                 if ( all(pixel == maskPixel) ):
                     return subObject #object's mask
 
-
-# SEGMENT THE IMAGE
-segment_image = instance_segmentation()
-segment_image.load_model("../../mask_rcnn_coco.h5")
-segvalues, output = segment_image.segmentImage("test2People.jpg", output_image_name= "test2Instances6.jpg", mask_points_values = True)
-
-# gets the detected objects' masks. length of onlyMasks is the number of detected objects
-onlyMasks = segvalues['masks'][0]
-
-#%%
 # CREATE BOOLEAN MASK FOR - NOT NEEDED?
 def createBooleanMaskFromPixelArray(maskPixelArray, imageX, imageY):
     booleanMask = np.zeros((imageY, imageX), np.bool8)
@@ -34,52 +43,55 @@ def createBooleanMaskFromPixelArray(maskPixelArray, imageX, imageY):
                 booleanMask[indexX, indexY] = True
     return booleanMask
 
-# GET A SINGLE MASK
-originalMask = onlyMasks[0].tolist()
-booleanMask = createBooleanMaskFromPixelArray(originalMask, 1800, 1200)
+# RETURNS SELECTED RELEVANT MASKS
+def getRelevantMasks(allMasks, relevantMaskIndexes):
+    relevantMasks = []
+    for maskIndex, mask in enumerate(allMasks):
+        if (maskIndex in relevantMaskIndexes):
+            relevantMasks.append(mask.tolist())
+    
+    return relevantMasks
+    # originalMask = allMasks[maskIndex].tolist()
+    #booleanMask = createBooleanMaskFromPixelArray(originalMask, 1800, 1200)
 
 # %%
 # CREATE A HIGH-QUALITY CUT-OUT OF THE SELECTED MASK
-import numpy
-from PIL import Image, ImageDraw
+def createHighQualitySegment(imageName, relevantMaskIndex, originalMask):
+    tupleList = []
+    for pixel in originalMask:
+        tupleList.append((pixel[0], pixel[1]))
 
-tupleList = []
-for pixel in originalMask:
-    tupleList.append((pixel[0], pixel[1]))
+    # read image as RGB and add alpha (transparency)
+    im = Image.open("test2PeopleCrop.jpg").convert("RGBA")
 
-# read image as RGB and add alpha (transparency)
-im = Image.open("test2PeopleCrop.jpg").convert("RGBA")
+    # convert to numpy (for convenience)
+    imArray = np.asarray(im)
 
-# convert to numpy (for convenience)
-imArray = numpy.asarray(im)
+    # create mask
+    #polygon = [(444,203),(623,243),(691,177),(581,26),(482,42)]
+    polygon = tupleList
+    maskIm = Image.new('L', (imArray.shape[1], imArray.shape[0]), 0)
+    ImageDraw.Draw(maskIm).polygon(polygon, outline=1, fill=1)
+    mask = np.array(maskIm)
 
-# create mask
-#polygon = [(444,203),(623,243),(691,177),(581,26),(482,42)]
-polygon = tupleList
-maskIm = Image.new('L', (imArray.shape[1], imArray.shape[0]), 0)
-ImageDraw.Draw(maskIm).polygon(polygon, outline=1, fill=1)
-mask = numpy.array(maskIm)
+    # assemble new image (uint8: 0-255)
+    newImArray = np.empty(imArray.shape,dtype='uint8')
 
-# assemble new image (uint8: 0-255)
-newImArray = numpy.empty(imArray.shape,dtype='uint8')
+    # colors (three first columns, RGB)
+    newImArray[:,:,:3] = imArray[:,:,:3]
 
-# colors (three first columns, RGB)
-newImArray[:,:,:3] = imArray[:,:,:3]
+    # transparency (4th column)
+    newImArray[:,:,3] = mask*255
 
-# transparency (4th column)
-newImArray[:,:,3] = mask*255
-
-# back to Image from numpy
-newIm = Image.fromarray(newImArray, "RGBA")
-newIm.save("out.png")
+    # back to Image from numpy
+    newIm = Image.fromarray(newImArray, "RGBA")
+    newIm.save(imageName+"-cutoutNumber"+relevantMaskIndex+".png")
+    return
 
 
 # %%
 # COMPRESS THE IMAGE
-def compressImage(file, verbose = False):
-    
-      # Get the path of the file
-    filepath = file
+def compressImage(imageName, filepath, verbose = False):
       
     # open the image
     picture = Image.open(filepath)
@@ -90,22 +102,19 @@ def compressImage(file, verbose = False):
     # your desired level, The more 
     # the value of quality variable 
     # and lesser the compression
-    picture.save("Compressed_"+file, 
+    outputFilename = imageName+"-compressed.jpg"
+    picture.save(imageName+"-compressed.jpg", 
                  "JPEG", 
                  optimize = True, 
                  quality = 10)
-    return
-
-compressImage('test2People.jpg')
+    return outputFilename
 
 # %%
 # PASTE (COMBINE) THE LOW-QUALITY BACKGROUND WITH HIGH-QUALITY FOREGROUND(S)
-from PIL import Image, ImageDraw, ImageFilter
+def pasteImages(foregrounds, background, imageName):
+    im1 = Image.open('Compressed_test2People.jpg')
 
-im1 = Image.open('Compressed_test2People.jpg')
-im2 = Image.open('out.png')
-
-im1.paste(im2, (0,0), im2)
-im1.save('paste.jpg')
-
-# %%
+    for foreground in foregrounds:
+        im2 = Image.open(imageName+"-cutoutNumber"+foreground)
+        im1.paste(im2, (0,0), im2)
+        im1.save("final-"+imageName+".jpg")
