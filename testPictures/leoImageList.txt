@@ -5,7 +5,6 @@ cat.jpg
 catPerson.jpg
 dog.jpg
 dog2.jpg
-leoImageList.txt
 milanBandic.jpg
 videogameScreenshot1.jpg
 videogameScreenshot2.jpg
