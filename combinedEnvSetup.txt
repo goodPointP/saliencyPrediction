@@ -1,0 +1,9 @@
+combined environment commands:
+1. conda create -n combinedEnv python=3.7
+2. conda activate combinedEnv 
+3. conda install tensorflow-gpu
+4. conda install pytorch torchvision cuda90 -c pytorch
+
+5. conda install cached-property
+6. conda install pixellib
+7. conda install pandas
