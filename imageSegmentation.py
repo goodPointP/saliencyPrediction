@@ -5,25 +5,43 @@ import pixellib
 import numpy as np
 from pixellib.instance import instance_segmentation
 from PIL import Image, ImageDraw, ImageFilter
+from skimage import io
+from skimage.transform import resize
+from skimage import img_as_bool
+import matplotlib.pyplot as plt
 
 outputsFolder = 'imageSegmenationOut/'
 
+# GET ORIGINAL IMAGE DIMENSIONS
+def getDimensions(imagePath):
+    image = Image.open(imagePath)
+    x, y = image.size
+    return (x, y)
+
 # SEGMENT THE IMAGE
-def segmentTheImage(imageName):
-    segment_image = instance_segmentation()
-    segment_image.load_model("../mask_rcnn_coco.h5")
-    segvalues, output = segment_image.segmentImage(imageName, output_image_name= outputsFolder + imageName+"-segmented.jpg", mask_points_values = True)
-    masks = segvalues['masks'][0] # gets the detected objects' masks. length of onlyMasks is the number of detected objects
+segment_image = instance_segmentation()
+segment_image.load_model("../mask_rcnn_coco.h5")
+def segmentTheImage(imagePath, imageName): 
+    print(outputsFolder + imageName+"-segmented.jpg")
+    segvalues, output = segment_image.segmentImage(imagePath, output_image_name= outputsFolder + imageName+"-segmented.jpg", mask_points_values = True)
+    masks = segvalues['masks'] # gets the detected objects' masks. length of onlyMasks is the number of detected objects
     return (masks, segvalues, output)
 
+def resizeHeatmap(heatmap, targetDims, savefile, imageName):
+    targetX = targetDims[0]
+    targetY = targetDims[1]
+    resizedHeatmap = img_as_bool(resize(heatmap, (targetY, targetX)))
+    if (savefile):
+        plt.imsave('finalOutputs/heatmap-'+imageName+'.jpg', resizedHeatmap)
+    return resizedHeatmap
+
 def createPixelArrayFromHeatmap(heatmap):
-    ## TO DO
-    #
-    #
-    #
-    #
-    #
-    pixelArray = []
+    coordinates = np.array(np.where(heatmap == True))
+    pixelArray = np.zeros(coordinates[0].shape, dtype=tuple)
+
+    for i, j in enumerate(pixelArray):
+        pixelArray[i] = coordinates[0][i], coordinates[1][i]
+   
     return pixelArray
 
 # CHECK IF PREDICTED GAZE POINT IS CONTAINED IN A DETECTED IMAGE SEGMENT
@@ -50,7 +68,10 @@ def getRelevantMasks(allMasks, relevantMaskIndexes):
     relevantMasks = []
     for maskIndex, mask in enumerate(allMasks):
         if (maskIndex in relevantMaskIndexes):
-            relevantMasks.append(mask.tolist())
+            if (type(mask) != list):
+                relevantMasks.append(mask.tolist())
+            else:
+                relevantMasks.append(mask)
     
     return relevantMasks
     # originalMask = allMasks[maskIndex].tolist()
@@ -58,13 +79,13 @@ def getRelevantMasks(allMasks, relevantMaskIndexes):
 
 # %%
 # CREATE A HIGH-QUALITY CUT-OUT OF THE SELECTED MASK
-def createHighQualitySegment(imageName, relevantMaskIndex, originalMask):
+def createHighQualitySegment(imagePath, imageName, relevantMaskIndex, originalMask):
     tupleList = []
     for pixel in originalMask:
         tupleList.append((pixel[0], pixel[1]))
 
     # read image as RGB and add alpha (transparency)
-    im = Image.open(imageName).convert("RGBA")
+    im = Image.open(imagePath).convert("RGBA")
 
     # convert to numpy (for convenience)
     imArray = np.asarray(im)
@@ -87,7 +108,7 @@ def createHighQualitySegment(imageName, relevantMaskIndex, originalMask):
 
     # back to Image from numpy
     newIm = Image.fromarray(newImArray, "RGBA")
-    newIm.save(outputsFolder+imageName+"-cutoutNumber"+relevantMaskIndex+".png")
+    newIm.save(outputsFolder+imageName+"-cutoutNumber"+str(relevantMaskIndex)+".png")
     return
 
 
@@ -114,9 +135,10 @@ def compressImage(imageName, filepath, verbose = False):
 # %%
 # PASTE (COMBINE) THE LOW-QUALITY BACKGROUND WITH HIGH-QUALITY FOREGROUND(S)
 def pasteImages(foregrounds, background, imageName):
-    im1 = Image.open(outputsFolder+'Compressed_test2People.jpg')
+    im1 = Image.open(outputsFolder+imageName+'-compressed.jpg')
 
     for foreground in foregrounds:
-        im2 = Image.open(outputsFolder+imageName+"-cutoutNumber"+foreground)
+        im2 = Image.open(outputsFolder+imageName+"-cutoutNumber"+str(foreground)+".png")
         im1.paste(im2, (0,0), im2)
-        im1.save(outputsFolder+"final-"+imageName+".jpg")
+        im1.save("finalOutputs/"+"final-"+imageName+".jpg")
+# %%
