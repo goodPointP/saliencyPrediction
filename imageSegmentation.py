@@ -20,7 +20,7 @@ def getDimensions(imagePath):
 
 # SEGMENT THE IMAGE
 segment_image = instance_segmentation()
-segment_image.load_model("../mask_rcnn_coco.h5")
+segment_image.load_model("models/mask_rcnn_coco.h5")
 def segmentTheImage(imagePath, imageName): 
     print(outputsFolder + imageName+"-segmented.jpg")
     segvalues, output = segment_image.segmentImage(imagePath, output_image_name= outputsFolder + imageName+"-segmented.jpg", mask_points_values = True)
