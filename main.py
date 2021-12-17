@@ -14,7 +14,7 @@ imageList = ['testPictures/dog.jpg', 'testPictures/2people1.jpg', 'testPictures/
 for imagePath in imageList:
     imageName = imagePath.split('/')[-1].split('.jpg')[0]
 
-    heatmap, imagePath = predictEyeGaze(imagePath, sigma=0.9) # SEBASTIAN I AM YOURS
+    heatmap = predictEyeGaze(imagePath, sigma=0.9) # SEBASTIAN I AM YOURS
     
     masks, segvalues, output = segmentTheImage(imagePath)
 
