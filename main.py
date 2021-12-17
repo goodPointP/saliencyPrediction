@@ -4,6 +4,7 @@ sys.path.insert(1, '/imageSegmentation')
 # package imports
 
 # saliency prediction imports
+import inference
 
 # image segmentation imports
 import imageSegmenation
@@ -13,7 +14,7 @@ imageList = ['testPictures/dog.jpg', 'testPictures/2people1.jpg', 'testPictures/
 for imagePath in imageList:
     imageName = imagePath.split('/')[-1].split('.jpg')[0]
 
-    heatmap, imagePath = predictEyeGaze(imagePath, sigma=0.9)
+    heatmap, imagePath = inference.predictEyeGaze(imagePath, sigma=0.9) # SEBASTIAN I AM YOURS
     
     masks, segvalues, output = imageSegmenation.segmentTheImage(imagePath)
 
