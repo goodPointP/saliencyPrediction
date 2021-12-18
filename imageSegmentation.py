@@ -4,7 +4,7 @@
 import pixellib 
 import numpy as np
 from pixellib.instance import instance_segmentation
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageEnhance, ImageOps
 from skimage import io
 from skimage.transform import resize
 from skimage import img_as_bool
@@ -114,7 +114,7 @@ def createHighQualitySegment(imagePath, imageName, relevantMaskIndex, originalMa
 
 # %%
 # COMPRESS THE IMAGE
-def compressImage(imageName, filepath, verbose = False):
+def compressImage(imageName, filepath, debugging = False):
       
     # open the image
     picture = Image.open(filepath)
@@ -126,6 +126,12 @@ def compressImage(imageName, filepath, verbose = False):
     # the value of quality variable 
     # and lesser the compression
     outputFilename = outputsFolder + imageName+"-compressed.jpg"
+
+    # convert to black and white if debugging enabled
+    if debugging:
+        picture = ImageOps.invert(picture)
+        #picture = picture.col
+
     picture.save(outputFilename, 
                  "JPEG", 
                  optimize = True, 

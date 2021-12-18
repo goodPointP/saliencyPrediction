@@ -10,10 +10,10 @@ from imageSegmentation import *
 
 
 model = heatmap_inference("models/newnet_model")
-imageList = ['testPictures/dog.jpg', 'testPictures/2people1.jpg', 'testPictures/car.jpg', 'testPictures/cat.jpg',
-'testPictures/2people2.jpg', 'testPictures/catPerson.jpg', 'testPictures/dog2.jpg', 'testPictures/milanBandic.jpg',
-'testPictures/videogameScreenshot1.jpg', 'testPictures/videogameScreenshot2.jpg', 'testPictures/woman.jpg']
-# imageList = ['testPictures/cat.jpg']
+# imageList = ['testPictures/dog.jpg', 'testPictures/2people1.jpg', 'testPictures/car.jpg', 'testPictures/cat.jpg',
+# 'testPictures/2people2.jpg', 'testPictures/catPerson.jpg', 'testPictures/dog2.jpg', 'testPictures/milanBandic.jpg',
+# 'testPictures/videogameScreenshot1.jpg', 'testPictures/videogameScreenshot2.jpg', 'testPictures/woman.jpg']
+imageList = ['testPictures/dog.jpg']
 
 for imagePath in imageList:
     imageName = imagePath.split('/')[-1].split('.jpg')[0]
@@ -52,7 +52,7 @@ for imagePath in imageList:
         createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
     
     # create compressed image
-    background = compressImage(imageName, imagePath)
+    background = compressImage(imageName, imagePath, debugging=True)
 
     pasteImages(relevantMaskIndexes, background, imageName)
     print('done with '+imageName)
