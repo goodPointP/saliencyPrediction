@@ -51,28 +51,6 @@ def loader_pipe(impaths, targets, parts=5, batch_size = 32, workers = 10):
     
     return train_loaded, test_loaded
 
-def evaluation_pipe(X, Y, batch_size = 32, workers = 10):
-    impaths = X
-    nparray_of_ground_truth =  Y
-    
-    transformer = transforms.Compose([transforms.Resize(256), 
-                                transforms.CenterCrop(224), 
-                                transforms.ToTensor(), 
-                                transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-                                ])
-    
-    dataset = gazedataset(impaths,
-                          nparray_of_ground_truth,
-                          transform=transformer)
-    
-    dataset_loaded = torch.utils.data.DataLoader(dataset,
-                                                 batch_size = batch_size,
-                                                 shuffle = True,
-                                                 num_workers=workers)
-    
-    return dataset_loaded
-
-
 def inference_pipe(input_tuple, batch_size = 16, workers = 10):
     
     start = input_tuple[0]

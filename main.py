@@ -8,18 +8,28 @@ from inline_inference import *
 #import imageSegmenation
 from imageSegmentation import *
 
+def getListOfImages():
+    with open('../../Datasets/EvaluationDataset/ALLSTIMULI/images.txt') as f:
+        lines = f.readlines()
+    
+    listOfImages = []
+    for line in lines:
+        listOfImages.append('../../Datasets/EvaluationDataset/ALLSTIMULI/' + line.split('\n')[0])
+    
+    return listOfImages
 
 model = heatmap_inference("models/newnet_model")
 # imageList = ['testPictures/dog.jpg', 'testPictures/2people1.jpg', 'testPictures/car.jpg', 'testPictures/cat.jpg',
 # 'testPictures/2people2.jpg', 'testPictures/catPerson.jpg', 'testPictures/dog2.jpg', 'testPictures/milanBandic.jpg',
 # 'testPictures/videogameScreenshot1.jpg', 'testPictures/videogameScreenshot2.jpg', 'testPictures/woman.jpg']
-imageList = ['testPictures/dog.jpg']
+# imageList = ['testPictures/istatic_coast_landscape_outdoor_dsc03095.jpg']
+imageList = getListOfImages()
 
 for imagePath in imageList:
     imageName = imagePath.split('/')[-1].split('.jpg')[0]
     imWidth, imHeight = getDimensions(imagePath)
 
-    heatmap = model.inline_inference(imagePath, 0.5)
+    heatmap = model.inline_inference(imagePath, 0.8)
     heatmap = resizeHeatmap(heatmap, (imWidth, imHeight), True, imageName)
     
 
@@ -35,27 +45,14 @@ for imagePath in imageList:
         if any([i for i in heatmapPixelsArray if i in mask[0]]):
             relevantMaskIndexes.append(index)
 
-
-    # for maskIndex, mask in enumerate(masks):
-    #     if (maskIndex not in relevantMaskIndexes):
-    #         for pixel in heatmapPixelsArray:
-    #             if (maskIndex not in relevantMaskIndexes):
-    #                 singleObjectMask = checkExistanceOfPixelInMask(pixel, mask)
-    #                 if (singleObjectMask):
-    #                     relevantMaskIndexes.append(maskIndex)
-    
-    #relevantMasks = getRelevantMasks(masks, relevantMaskIndexes)
-
     foregroundList = []
     for relevantMaskIndex in relevantMaskIndexes:
         #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
         createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
     
     # create compressed image
-    background = compressImage(imageName, imagePath, debugging=True)
+    background = compressImage(imageName, imagePath, debugging=False)
 
     pasteImages(relevantMaskIndexes, background, imageName)
     print('done with '+imageName)
-# %%
 
-# %%
