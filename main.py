@@ -25,6 +25,7 @@ model = heatmap_inference("models/newnet_model")
 # imageList = ['testPictures/istatic_coast_landscape_outdoor_dsc03095.jpg']
 imageList = getListOfImages()
 succesfullyProcessedList = []
+imagesWithNoMasks = []
 
 for imagePath in imageList:
     try:
@@ -46,25 +47,37 @@ for imagePath in imageList:
         for index, mask in enumerate(masks):
             if any([i for i in heatmapPixelsArray if i in mask[0]]):
                 relevantMaskIndexes.append(index)
-
-        foregroundList = []
-        for relevantMaskIndex in relevantMaskIndexes:
-            #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
-            createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
         
-        # create compressed image
-        background = compressImage(imageName, imagePath, debugging=False)
+        if len(relevantMaskIndexes)>0:
+            foregroundList = []
+            for relevantMaskIndex in relevantMaskIndexes:
+                #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
+                createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
+            
+            # create compressed image
+            background = compressImage(imageName, imagePath, debugging=False)
 
-        pasteImages(relevantMaskIndexes, background, imageName)
-        print('done with '+imageName)
-        succesfullyProcessedList.append(imageName)
+            pasteImages(relevantMaskIndexes, background, imageName)
+            print('done with '+imageName)
+            succesfullyProcessedList.append(imageName)
+        else:
+            imagesWithNoMasks.append(imageName)
     except:
         pass
-
+    
 
 textfile = open("successfullyProcessedImages.txt", "w")
 
 for element in succesfullyProcessedList:
+
+    textfile.write(element + "\n")
+
+textfile.close()
+
+
+textfile = open("unsuccessfullyProcessedImages.txt", "w")
+
+for element in imagesWithNoMasks:
 
     textfile.write(element + "\n")
 
