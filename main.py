@@ -24,6 +24,7 @@ model = heatmap_inference("models/newnet_model")
 # 'testPictures/videogameScreenshot1.jpg', 'testPictures/videogameScreenshot2.jpg', 'testPictures/woman.jpg']
 # imageList = ['testPictures/istatic_coast_landscape_outdoor_dsc03095.jpg']
 imageList = getListOfImages()
+succesfullyProcessedList = []
 
 for imagePath in imageList:
     try:
@@ -56,6 +57,15 @@ for imagePath in imageList:
 
         pasteImages(relevantMaskIndexes, background, imageName)
         print('done with '+imageName)
+        succesfullyProcessedList.append(imageName)
     except:
         pass
 
+
+textfile = open("successfullyProcessedImages.txt", "w")
+
+for element in succesfullyProcessedList:
+
+    textfile.write(element + "\n")
+
+textfile.close()
