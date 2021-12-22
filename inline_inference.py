@@ -26,8 +26,9 @@ class heatmap_inference():
                                     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
                                     ])
         
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        self.model = torch.load(model)
+        #self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cpu')
+        self.model = torch.load(model, map_location=torch.device('cpu'))
         self.model.to(self.device)
         self.model.eval()
         self.transform = transformer
