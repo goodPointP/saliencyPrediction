@@ -26,33 +26,36 @@ model = heatmap_inference("models/newnet_model")
 imageList = getListOfImages()
 
 for imagePath in imageList:
-    imageName = imagePath.split('/')[-1].split('.jpg')[0]
-    imWidth, imHeight = getDimensions(imagePath)
+    try:
+        imageName = imagePath.split('/')[-1].split('.jpg')[0]
+        imWidth, imHeight = getDimensions(imagePath)
 
-    heatmap = model.inline_inference(imagePath, 0.8)
-    heatmap = resizeHeatmap(heatmap, (imWidth, imHeight), True, imageName)
-    
+        heatmap = model.inline_inference(imagePath, 0.8)
+        heatmap = resizeHeatmap(heatmap, (imWidth, imHeight), True, imageName)
+        
 
-    masks, segvalues, output = segmentTheImage(imagePath, imageName)
+        masks, segvalues, output = segmentTheImage(imagePath, imageName)
 
-    heatmapPixelsArray = createPixelArrayFromHeatmap(heatmap)
-    # convert to set for easier checking
-    heatmapPixelsArray = set(heatmapPixelsArray)
+        heatmapPixelsArray = createPixelArrayFromHeatmap(heatmap)
+        # convert to set for easier checking
+        heatmapPixelsArray = set(heatmapPixelsArray)
 
-    relevantMaskIndexes = []
+        relevantMaskIndexes = []
 
-    for index, mask in enumerate(masks):
-        if any([i for i in heatmapPixelsArray if i in mask[0]]):
-            relevantMaskIndexes.append(index)
+        for index, mask in enumerate(masks):
+            if any([i for i in heatmapPixelsArray if i in mask[0]]):
+                relevantMaskIndexes.append(index)
 
-    foregroundList = []
-    for relevantMaskIndex in relevantMaskIndexes:
-        #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
-        createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
-    
-    # create compressed image
-    background = compressImage(imageName, imagePath, debugging=False)
+        foregroundList = []
+        for relevantMaskIndex in relevantMaskIndexes:
+            #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
+            createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
+        
+        # create compressed image
+        background = compressImage(imageName, imagePath, debugging=False)
 
-    pasteImages(relevantMaskIndexes, background, imageName)
-    print('done with '+imageName)
+        pasteImages(relevantMaskIndexes, background, imageName)
+        print('done with '+imageName)
+    except:
+        pass
 
