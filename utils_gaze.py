@@ -99,7 +99,7 @@ def compute_heatmap(df, s_index, s_trial, experiment = None, last_tr=None, draw=
         return heatmaps
                 
 
-def draw_heatmap(fixations, dispsize, imagefile=None, durationweight=True, alpha=0.5, savefilename=None, draw=True):
+def draw_heatmap(fixations, dispsize, scale=(1,1), imagefile=None, durationweight=True, alpha=0.5, savefilename=None, draw=True):
     #function from Pygazeanalyser
     """Draws a heatmap of the provided fixations, optionally drawn over an
     image, and optionally allocating more weight to fixations with a higher
@@ -136,7 +136,7 @@ def draw_heatmap(fixations, dispsize, imagefile=None, durationweight=True, alpha
     """
 
     # FIXATIONS
-    fix = parse_fixations(fixations)
+    fix = parse_fixations(fixations, scale)
 
     # HEATMAP
     # Gaussian
@@ -177,9 +177,9 @@ def draw_heatmap(fixations, dispsize, imagefile=None, durationweight=True, alpha
             # add Gaussian to the current heatmap
             heatmap[y:y+gwh,x:x+gwh] += gaus * fix['dur'][i]
     # resize heatmap
-    heatmap = heatmap[np.newaxis, strt:dispsize[1]+strt,strt:dispsize[0]+strt]
     # IMAGE
     if draw:
+        heatmap = heatmap[strt:dispsize[1]+strt,strt:dispsize[0]+strt]
         fig, ax = draw_display(dispsize, imagefile=imagefile)
         
         # remove zeros
@@ -195,9 +195,10 @@ def draw_heatmap(fixations, dispsize, imagefile=None, durationweight=True, alpha
         return fig, heatmap
     
     else:
+        heatmap = heatmap[np.newaxis, strt:dispsize[1]+strt,strt:dispsize[0]+strt]
         return  heatmap
 
-def parse_fixations(fixations):
+def parse_fixations(fixations, scale):
     #function from Pygazeanalyser
     """Returns all relevant data from a list of fixation ending events
     
@@ -219,9 +220,9 @@ def parse_fixations(fixations):
             'dur':np.zeros(len(fixations))}
     # get all fixation coordinates
     for fixnr in range(len( fixations)):
-        stime, etime, dur, ex, ey = fixations[fixnr]
-        fix['x'][fixnr] = ex
-        fix['y'][fixnr] = ey
+        ex, ey, dur = fixations[fixnr]
+        fix['x'][fixnr] = ex/scale[0]
+        fix['y'][fixnr] = ey/scale[1]
         fix['dur'][fixnr] = dur
     
     return fix
