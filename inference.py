@@ -11,7 +11,7 @@
 e.g. : 
     python3 inference.py -m models/newnet_model -o models/inferencetest -i_tuple 0 10
     python inference.py -m models/newnet_model -i_tuple 0 10 -so testPictures/testdataset
-    
+python inference.py -m models/newnet_model -i_data test_loader.pt 
     
 """
 from scipy.stats import wasserstein_distance
@@ -35,17 +35,6 @@ parser.add_argument('-so', default=None, required=False, dest='save')
 
 args = parser.parse_args()
 
-#%%
-
-args.model = 'models/newnet_model'
-args.tuple = 0,10
-args.save = 'testPictures/testdataset'
-
-
-
-
-# if not args.input:
-#     sys.exit("input not found. Use '-i tuple' or '-i data' with two ints or a dataloader, respectively")
 
 accuracy = 0
 heatmaps = []
@@ -76,7 +65,8 @@ elif args.dataset:
 else:
     print(args.input)
     sys.exit("input not found. Use '-i tuple' or '-i data' with two ints or a dataloader, respectively")
-#%%
+
+
 if __name__ == '__main__':
     with torch.no_grad():
         print("computing predictions")
