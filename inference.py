@@ -11,7 +11,7 @@
 e.g. : 
     python3 inference.py -m models/newnet_model -o models/inferencetest -i_tuple 0 10
     python inference.py -m models/newnet_model -i_tuple 0 10 -so testPictures/testdataset
-python inference.py -m models/newnet_model -i_data test_loader.pt 
+python3 inference.py -m models/newnet_model -i_data test_loader.pt 
     
 """
 from scipy.stats import wasserstein_distance
@@ -85,7 +85,7 @@ if __name__ == '__main__':
             cc += pearson_corrcoef(flat_p, flat_y).cpu().numpy() # 1 = good | 0 = bad
             auc += auroc(flat_p, flat_y.int(), pos_label=1).cpu().numpy() #1 = good | 0 = bad
             emd += wasserstein_distance(flat_p.cpu(), flat_y.cpu())#small = good
-            
+            print(cc, auc, emd)
             heatmaps.append(predict.cpu())
 
 accs = np.array((cc, auc, emd))/len(dataset.sampler)
