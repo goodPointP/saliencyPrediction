@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-models/
+models/mask_rcnn_coco.h5
 build/
 develop-eggs/
 dist/

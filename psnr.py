@@ -19,7 +19,7 @@ def PSNR(original, compressed):
 #      value = PSNR(original, compressed)
 #      print(f"PSNR value is {value} dB")
 
-dir_name = '../../Datasets/EVALUATIONSUBSET/OURFINALOUTPUTS/'
+dir_name = '../../Datasets/HighResSet/OURFINALOUTPUTS/'
 # Get list of all files only in the given directory
 list_of_files = filter( lambda x: os.path.isfile(os.path.join(dir_name, x)),
                         os.listdir(dir_name) )
@@ -32,9 +32,9 @@ ourfinalvalue = []
 targetedfinalvalue = []
 for file_name, size in files_with_size:
     #print(size, ' -->', file_name) 
-    original = cv2.imread("../../Datasets/EVALUATIONSUBSET/ORIGINALIMAGES/"+file_name)
-    compressed = cv2.imread("../../Datasets/EVALUATIONSUBSET/OURFINALOUTPUTS/"+file_name, 1)
-    compressedTargeted = cv2.imread("../../Datasets/EVALUATIONSUBSET/TARGETEDFILESIZES/"+file_name+".jpg", 1)
+    original = cv2.imread("../../Datasets/HighResSet/ORIGINALIMAGES/"+file_name.split('.jpg')[0]+'.png')
+    compressed = cv2.imread("../../Datasets/HighResSet/OURFINALOUTPUTS/"+file_name, 1)
+    compressedTargeted = cv2.imread("../../Datasets/HighResSet/TARGETEDFILESIZES/"+file_name+".jpg", 1)
     ourfinalvalue.append(PSNR(original, compressed))
     targetedfinalvalue.append(PSNR(original, compressedTargeted))
     
