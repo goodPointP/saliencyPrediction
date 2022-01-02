@@ -10,7 +10,7 @@ from skimage.transform import resize
 from skimage import img_as_bool
 import matplotlib.pyplot as plt
 
-outputsFolder = 'imageSegmenationOut/'
+outputsFolder = 'imageSegmentationOut/'
 
 # GET ORIGINAL IMAGE DIMENSIONS
 def getDimensions(imagePath):
@@ -40,9 +40,9 @@ def createPixelArrayFromHeatmap(heatmap):
     pixelArray = np.zeros(coordinates[0].shape, dtype=tuple)
 
     for i, j in enumerate(pixelArray):
-        pixelArray[i] = coordinates[0][i], coordinates[1][i]
+        pixelArray[i] = [coordinates[0][i], coordinates[1][i]]
    
-    return pixelArray
+    return list(pixelArray)
 
 # CHECK IF PREDICTED GAZE POINT IS CONTAINED IN A DETECTED IMAGE SEGMENT
 def checkExistanceOfPixelInMask(pixel, mask):

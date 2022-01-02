@@ -1,5 +1,10 @@
 #%%
+
+image_path = '../../Datasets/HighResSet/JPEG100QUALITY/images.txt'
+folder_path = '../../Datasets/HighResSet/JPEG100QUALITY/'
+
 # package imports
+
 
 # saliency prediction imports
 from inline_inference import *
@@ -8,13 +13,14 @@ from inline_inference import *
 #import imageSegmenation
 from imageSegmentation import *
 
+
 def getListOfImages():
-    with open('../../Datasets/HighResSet/JPEG100QUALITY/images.txt') as f:
+    with open(image_path) as f:
         lines = f.readlines()
     
     listOfImages = []
     for line in lines:
-        listOfImages.append('../../Datasets/HighResSet/JPEG100QUALITY/' + line.split('\n')[0])
+        listOfImages.append(folder_path + line.split('\n')[0])
     
     return listOfImages
 
@@ -22,8 +28,8 @@ model = heatmap_inference("models/newnet_model")
 # imageList = ['testPictures/dog.jpg', 'testPictures/2people1.jpg', 'testPictures/car.jpg', 'testPictures/cat.jpg',
 # 'testPictures/2people2.jpg', 'testPictures/catPerson.jpg', 'testPictures/dog2.jpg', 'testPictures/milanBandic.jpg',
 # 'testPictures/videogameScreenshot1.jpg', 'testPictures/videogameScreenshot2.jpg', 'testPictures/woman.jpg']
-# imageList = ['testPictures/istatic_coast_landscape_outdoor_dsc03095.jpg']
-imageList = getListOfImages()
+imageList = ['../../Datasets/HighResSet/JPEG100QUALITY/0046.jpg']
+#imageList = getListOfImages()
 succesfullyProcessedList = []
 imagesWithNoMasks = []
 
@@ -40,15 +46,21 @@ for imagePath in imageList:
 
         heatmapPixelsArray = createPixelArrayFromHeatmap(heatmap)
             # convert to set for easier checking
-        heatmapPixelsArray = set(heatmapPixelsArray)
+        #heatmapPixelsArray = set(heatmapPixelsArray)
 
         relevantMaskIndexes = []
 
         for index, mask in enumerate(masks):
-            if any([i for i in heatmapPixelsArray if i in mask[0]]):
-                relevantMaskIndexes.append(index)
-            
+            for i in mask[0]:
+                if list(i) in heatmapPixelsArray:
+                    relevantMaskIndexes.append(index)
+           # if [i for i in heatmapPixelsArray if all(i) in mask[0]]:
+            #    relevantMaskIndexes.append(index)
+        
+        
+
         if len(relevantMaskIndexes)>0:
+            relevantMaskIndexes = list(set(relevantMaskIndexes))
             foregroundList = []
             for relevantMaskIndex in relevantMaskIndexes:
                 #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
@@ -62,8 +74,9 @@ for imagePath in imageList:
             succesfullyProcessedList.append(imageName)
         else:
             imagesWithNoMasks.append(imageName)
-    except:
+    except ValueError as err:
         print('Error occurred, skipping '+ imagePath)
+        print(err)
         pass
    
     

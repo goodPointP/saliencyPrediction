@@ -25,7 +25,7 @@ pip-wheel-metadata/
 share/python-wheels/
 finalOutputs
 finalOutputsHighRes
-imageSegmenationOut
+imageSegmentationOut
 *.egg-info/
 .installed.cfg
 *.egg

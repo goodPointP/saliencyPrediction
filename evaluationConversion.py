@@ -48,7 +48,7 @@ def JPEGSaveWithTargetSize(im, filename, target):
 
 # READ OUR RESULTING filesizes
 import os
-dir_name = '../../Datasets/HighResSet/JPEG100QUALITY/'
+dir_name = '../../Datasets/HighResSet/OURFINALOUTPUTS/'
 # Get list of all files only in the given directory
 list_of_files = filter( lambda x: os.path.isfile(os.path.join(dir_name, x)),
                         os.listdir(dir_name) )
@@ -59,6 +59,6 @@ files_with_size = [ (file_name, os.stat(os.path.join(dir_name, file_name)).st_si
 # and print them one by one.
 for file_name, size in files_with_size:
     #print(size, ' -->', file_name) 
-    im = Image.open("../../Datasets/HighResSet/ORIGINALIMAGES/"+file_name)
-    JPEGSaveWithTargetSize(im, "../../Datasets/EVALUATIONSUBSET/TARGETEDFILESIZES/"+file_name+".jpg", size)
+    im = Image.open("../../Datasets/HighResSet/JPEG100QUALITY/"+file_name[-8:])
+    JPEGSaveWithTargetSize(im, "../../Datasets/HighResSet/TARGETEDFILESIZES/"+file_name[-8:], size)
 # %%

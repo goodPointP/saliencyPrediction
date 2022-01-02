@@ -26,16 +26,19 @@ list_of_files = filter( lambda x: os.path.isfile(os.path.join(dir_name, x)),
 # Create a list of files in directory along with the size
 files_with_size = [ (file_name, os.stat(os.path.join(dir_name, file_name)).st_size) 
                     for file_name in list_of_files  ]
-
+#%%
 
 ourfinalvalue = []
 targetedfinalvalue = []
 for file_name, size in files_with_size:
     #print(size, ' -->', file_name) 
-    original = cv2.imread("../../Datasets/HighResSet/ORIGINALIMAGES/"+file_name.split('.jpg')[0]+'.png')
+    original = cv2.imread("../../Datasets/HighResSet/ORIGINALIMAGES/"+file_name.split('.jpg')[0].split('final-')[1]+'.png')
     compressed = cv2.imread("../../Datasets/HighResSet/OURFINALOUTPUTS/"+file_name, 1)
-    compressedTargeted = cv2.imread("../../Datasets/HighResSet/TARGETEDFILESIZES/"+file_name+".jpg", 1)
+    compressedTargeted = cv2.imread("../../Datasets/HighResSet/TARGETEDFILESIZES/"+file_name.split('final-')[1], 1)
     ourfinalvalue.append(PSNR(original, compressed))
     targetedfinalvalue.append(PSNR(original, compressedTargeted))
     
+# %%
+ourMeanPSNR = np.array(ourfinalvalue).mean()
+targetMeanPSNR = np.array(targetedfinalvalue).mean()
 # %%
