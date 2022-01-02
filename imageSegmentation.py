@@ -135,8 +135,8 @@ def compressImage(imageName, filepath, debugging = False):
 
     picture.save(outputFilename, 
                  "JPEG", 
-                 optimize = True, 
-                 quality = 10)
+                 optimize = False, 
+                 quality = 20)
     return outputFilename
 
 # %%
@@ -147,5 +147,5 @@ def pasteImages(foregrounds, background, imageName):
     for foreground in foregrounds:
         im2 = Image.open(outputsFolder+imageName+"-cutoutNumber"+str(foreground)+".png")
         im1.paste(im2, (0,0), im2)
-        im1.save("finalOutputs/"+"final-"+imageName+".jpg")
+        im1.save("finalOutputsHighRes/"+"final-"+imageName+".jpg")
 # %%

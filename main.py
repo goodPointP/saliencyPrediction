@@ -9,12 +9,12 @@ from inline_inference import *
 from imageSegmentation import *
 
 def getListOfImages():
-    with open('../../Datasets/EvaluationDataset/ALLSTIMULI/images.txt') as f:
+    with open('../../Datasets/HighResSet/JPEG100QUALITY/images.txt') as f:
         lines = f.readlines()
     
     listOfImages = []
     for line in lines:
-        listOfImages.append('../../Datasets/EvaluationDataset/ALLSTIMULI/' + line.split('\n')[0])
+        listOfImages.append('../../Datasets/HighResSet/JPEG100QUALITY/' + line.split('\n')[0])
     
     return listOfImages
 
@@ -28,42 +28,40 @@ succesfullyProcessedList = []
 imagesWithNoMasks = []
 
 for imagePath in imageList:
-    try:
-        imageName = imagePath.split('/')[-1].split('.jpg')[0]
-        imWidth, imHeight = getDimensions(imagePath)
+    imageName = imagePath.split('/')[-1].split('.jpg')[0]
+    imWidth, imHeight = getDimensions(imagePath)
 
-        heatmap = model.inline_inference(imagePath, 0.8)
-        heatmap = resizeHeatmap(heatmap, (imWidth, imHeight), True, imageName)
+    heatmap = model.inline_inference(imagePath, 0.5)
+    heatmap = resizeHeatmap(heatmap, (imWidth, imHeight), True, imageName)
         
 
-        masks, segvalues, output = segmentTheImage(imagePath, imageName)
+    masks, segvalues, output = segmentTheImage(imagePath, imageName)
 
-        heatmapPixelsArray = createPixelArrayFromHeatmap(heatmap)
+    heatmapPixelsArray = createPixelArrayFromHeatmap(heatmap)
         # convert to set for easier checking
-        heatmapPixelsArray = set(heatmapPixelsArray)
+    heatmapPixelsArray = set(heatmapPixelsArray)
 
-        relevantMaskIndexes = []
+    relevantMaskIndexes = []
 
-        for index, mask in enumerate(masks):
-            if any([i for i in heatmapPixelsArray if i in mask[0]]):
-                relevantMaskIndexes.append(index)
+    for index, mask in enumerate(masks):
+        if any([i for i in heatmapPixelsArray if i in mask[0]]):
+            relevantMaskIndexes.append(index)
         
-        if len(relevantMaskIndexes)>0:
-            foregroundList = []
-            for relevantMaskIndex in relevantMaskIndexes:
-                #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
-                createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
+    if len(relevantMaskIndexes)>0:
+        foregroundList = []
+        for relevantMaskIndex in relevantMaskIndexes:
+            #foregroundList.append(imageName, relevantMaskIndex, relevantMask)
+            createHighQualitySegment(imagePath, imageName, relevantMaskIndex, masks[relevantMaskIndex][0])
             
-            # create compressed image
-            background = compressImage(imageName, imagePath, debugging=False)
+        # create compressed image
+        background = compressImage(imageName, imagePath, debugging=False)
 
-            pasteImages(relevantMaskIndexes, background, imageName)
-            print('done with '+imageName)
-            succesfullyProcessedList.append(imageName)
-        else:
-            imagesWithNoMasks.append(imageName)
-    except:
-        pass
+        pasteImages(relevantMaskIndexes, background, imageName)
+        print('done with '+imageName)
+        succesfullyProcessedList.append(imageName)
+    else:
+        imagesWithNoMasks.append(imageName)
+   
     
 
 textfile = open("successfullyProcessedImages.txt", "w")
@@ -82,3 +80,5 @@ for element in imagesWithNoMasks:
     textfile.write(element + "\n")
 
 textfile.close()
+
+# %%

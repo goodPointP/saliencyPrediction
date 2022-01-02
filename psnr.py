@@ -33,8 +33,8 @@ targetedfinalvalue = []
 for file_name, size in files_with_size:
     #print(size, ' -->', file_name) 
     original = cv2.imread("../../Datasets/EVALUATIONSUBSET/ORIGINALIMAGES/"+file_name)
-    compressed = cv2.imread("../../Datasets/EVALUATIONSUBSET/OURFINALOUTPUTS/"+file_name+".jpg", 1)
-    compressedTargeted = cv2.imread("../../Datasets/EVALUATIONSUBSET/TARGETEDFILESIZES/"+file_name, 1)
+    compressed = cv2.imread("../../Datasets/EVALUATIONSUBSET/OURFINALOUTPUTS/"+file_name, 1)
+    compressedTargeted = cv2.imread("../../Datasets/EVALUATIONSUBSET/TARGETEDFILESIZES/"+file_name+".jpg", 1)
     ourfinalvalue.append(PSNR(original, compressed))
     targetedfinalvalue.append(PSNR(original, compressedTargeted))
     
