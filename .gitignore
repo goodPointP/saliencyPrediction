@@ -23,10 +23,9 @@ var/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
-finalOutputs/
-finalOutputsHighRes/
-imageSegmentationOut/
-pyganalyzer/
+finalOutputs
+finalOutputsHighRes
+imageSegmentationOut
 *.egg-info/
 .installed.cfg
 *.egg
