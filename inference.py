@@ -9,61 +9,86 @@
 < -s boolean> : save dataloader created - requires "i_tuple"
 < -so path/to_dataloader_outfile>
 e.g. : 
-    python3 inference.py -m models/newnet_model -o models/inferencetest -i 0 10
+    python3 inference.py -m models/newnet_model -o models/inferencetest -i_tuple 0 10
+    python inference.py -m models/newnet_model -i_tuple 0 10 -so testPictures/testdataset
+python3 inference.py -m models/newnet_model -i_data test_loader.pt 
+    
 """
-
+from scipy.stats import wasserstein_distance
 import torch
+import numpy as np
 import argparse
 from utils_data import inference_pipe
 import sys
+from torchmetrics.functional import auroc, pearson_corrcoef, dice_score
 
+
+#%%
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 parser = argparse.ArgumentParser(description='model inference')
-parser.add_argument('-m', default=None, required=True, dest='model')
-parser.add_argument('-i_tuple', default=None, dest='input',type=int, nargs="+")
-parser.add_argument('-i_data', default=None,  dest='input')
-parser.add_argument('-o', default=None, required=True, dest='outfile')
-parser.add_argument('-s', default=False, required=False, dest='save')
-parser.add_argument('-so', default=None, required='-s' in sys.argv, dest='dataset_outfile')
+parser.add_argument('-m', default=None, required=False, dest='model')
+parser.add_argument('-i_tuple', default=None, dest='tuple',type=int, nargs="+")
+parser.add_argument('-i_data', default=None,  dest='dataset')
+parser.add_argument('-i', default=None, dest='input')
+parser.add_argument('-o', default=None, required=False, dest='outfile')
+parser.add_argument('-so', default=None, required=False, dest='save')
 
 args = parser.parse_args()
 
-if not args.input:
-    sys.exit("input not found. Use '-i tuple' or '-i data' with two ints or a dataloader, respectively")
 
 accuracy = 0
 heatmaps = []
 
-# if not missing_keys:
+
 print("loading model")
 gazenet = torch.load(args.model)
 gazenet.to(device)
 gazenet.eval()
-
-if len(args.input) > 1:
+cc = 0
+auc = 0
+emd = 0
+if args.tuple:
+    print(args.tuple)
+    args.input = args.tuple
     print("constructing dataset")
     args.input = tuple(args.input)
-    dataset = inference_pipe(args.input, batch_size = 1, workers = 10)
+    dataset = inference_pipe(args.input, batch_size = 1, workers=0)
     if args.save:
-        torch.save(dataset, args.dataset_outfile)
-else:
+        torch.save(dataset, args.save)
+
+elif args.dataset:
+    print(args.dataset)
+    args.input = args.dataset
     print("using pre-constructed dataloader")
-    dataset = args.input
-
-print("computing predictions")
-for idx, (X, y) in enumerate(dataset):
+    dataset = torch.load(args.input)
     
-    X = X.to(device)
-    y = y.to(device).float()
+else:
+    print(args.input)
+    sys.exit("input not found. Use '-i tuple' or '-i data' with two ints or a dataloader, respectively")
 
-    predict = gazenet(X)
-    
-    # loss = loss_fn(predict_test, y_test)
-    # valid_loss+=loss.item()*X_test.size(0)
-    # accuracy metric here
-    heatmaps.append(predict.cpu())
 
-torch.save(heatmaps, args.outfile)
-print("accuracy: {}".format(accuracy))
-# else:
-#     print("inference cancelled. Missing keys: {}".format(missing_keys))
+if __name__ == '__main__':
+    with torch.no_grad():
+        print("computing predictions")
+        for idx, (X, y) in enumerate(dataset):
+            if len(X) == 3:
+                X = X.unsqueeze(0)
+                
+            X = X.to(device)
+            y = y.to(device).float()
+        
+            predict = gazenet(X)
+            
+            flat_p = predict.flatten()
+            flat_y = y.flatten()
+            
+            cc += pearson_corrcoef(flat_p, flat_y).cpu().numpy() # 1 = good | 0 = bad
+            auc += auroc(flat_p, flat_y.int(), pos_label=1).cpu().numpy() #1 = good | 0 = bad
+            emd += wasserstein_distance(flat_p.cpu(), flat_y.cpu())#small = good
+            print(cc, auc, emd)
+            heatmaps.append(predict.cpu())
+
+accs = np.array((cc, auc, emd))/len(dataset.sampler)
+if args.outfile:
+    torch.save(heatmaps, args.outfile)
+print("accuracy: {}".format(accs))
