@@ -2,13 +2,15 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+*successfullyProcessedImages.txt
+*unsuccessfullyProcessedImages.txt
 # C extensions
 *.so
 
 # Distribution / packaging
 .Python
 models/
+finalOutputsHighResSebastian/
 build/
 develop-eggs/
 dist/

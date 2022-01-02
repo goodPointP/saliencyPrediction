@@ -147,5 +147,5 @@ def pasteImages(foregrounds, background, imageName):
     for foreground in foregrounds:
         im2 = Image.open(outputsFolder+imageName+"-cutoutNumber"+str(foreground)+".png")
         im1.paste(im2, (0,0), im2)
-        im1.save("finalOutputsHighRes/"+"final-"+imageName+".jpg")
+        im1.save("finalOutputsHighResSebastian/"+"final-"+imageName+".jpg")
 # %%
