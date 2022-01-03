@@ -28,8 +28,8 @@ model = heatmap_inference("models/newnet_model")
 # imageList = ['testPictures/dog.jpg', 'testPictures/2people1.jpg', 'testPictures/car.jpg', 'testPictures/cat.jpg',
 # 'testPictures/2people2.jpg', 'testPictures/catPerson.jpg', 'testPictures/dog2.jpg', 'testPictures/milanBandic.jpg',
 # 'testPictures/videogameScreenshot1.jpg', 'testPictures/videogameScreenshot2.jpg', 'testPictures/woman.jpg']
-#imageList = ['../../Datasets/HighResSet/JPEG100QUALITY/0046.jpg']
-imageList = getListOfImages()
+imageList = ['../../Datasets/HighResSet/JPEG100QUALITY/0025.jpg']
+#imageList = getListOfImages()
 succesfullyProcessedList = []
 imagesWithNoMasks = []
 
@@ -51,8 +51,13 @@ for imagePath in imageList:
         relevantMaskIndexes = []
 
         for index, mask in enumerate(masks):
-            for i in mask[0]:
-                if list(i) in heatmapPixelsArray:
+            if len(mask)>1:
+                #mask = np.array(mask).ravel()
+                mask = [list(item) for sublist in mask for item in sublist]
+            else:
+                mask = mask[0]
+            for i in mask:
+                if list(i)[::-1] in heatmapPixelsArray:
                     relevantMaskIndexes.append(index)
            # if [i for i in heatmapPixelsArray if all(i) in mask[0]]:
             #    relevantMaskIndexes.append(index)
